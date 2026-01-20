@@ -1,7 +1,9 @@
-import React, { useState, useEffect } from 'react';
-import { Lock, Mail, LogIn, User, Calendar, Eye, EyeOff } from 'lucide-react';
+import { useState, useEffect, FormEvent } from 'react';
+import { Lock, Mail, User, Calendar, Eye, EyeOff, ArrowRight, Globe } from 'lucide-react';
 import { toast } from 'react-hot-toast';
+import { motion, AnimatePresence } from 'framer-motion';
 import { supabase } from '../lib/supabase';
+import { cn } from '../lib/utils';
 
 export default function Auth() {
   const [email, setEmail] = useState('');
@@ -45,13 +47,13 @@ export default function Auth() {
       age--;
     }
     
-    return age >= 16; // Updated minimum age to 16
+    return age >= 16;
   };
 
-  const checkEmailExists = async (email: string) => {
+  const checkEmailExists = async (emailToCheck: string) => {
     try {
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email,
+      const { error } = await supabase.auth.signInWithPassword({
+        email: emailToCheck,
         password: 'temporary-check-password',
       });
       return !error || error.message !== 'Invalid login credentials';
@@ -60,12 +62,12 @@ export default function Auth() {
     }
   };
 
-  const checkUsernameExists = async (username: string) => {
+  const checkUsernameExists = async (usernameToCheck: string) => {
     try {
-      const { data, error } = await supabase
+      const { data } = await supabase
         .from('profiles_public')
         .select('username')
-        .eq('username', username);
+        .eq('username', usernameToCheck);
       
       return data && data.length > 0;
     } catch {
@@ -73,12 +75,11 @@ export default function Auth() {
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
 
     try {
-      // Validate password length
       if (password.length < 6) {
         toast.error('Password should be at least 6 characters');
         setIsLoading(false);
@@ -86,28 +87,24 @@ export default function Auth() {
       }
 
       if (isSignUp) {
-        // Validate passwords match
         if (password !== confirmPassword) {
           toast.error('Passwords do not match');
           setIsLoading(false);
           return;
         }
 
-        // Validate required fields
         if (!firstName.trim() || !lastName.trim() || !username.trim() || !dateOfBirth) {
           toast.error('Please fill in all required fields');
           setIsLoading(false);
           return;
         }
 
-        // Validate age
         if (!validateAge(dateOfBirth)) {
           toast.error('You must be at least 16 years old to register');
           setIsLoading(false);
           return;
         }
 
-        // Check if email already exists
         const emailExists = await checkEmailExists(email);
         if (emailExists) {
           toast.error('An account with this email already exists');
@@ -115,7 +112,6 @@ export default function Auth() {
           return;
         }
 
-        // Check if username exists
         const usernameExists = await checkUsernameExists(username);
         if (usernameExists) {
           toast.error('This username is already taken');
@@ -127,6 +123,7 @@ export default function Auth() {
           email,
           password,
           options: {
+            emailRedirectTo: `${window.location.origin}/`,
             data: {
               username,
               first_name: firstName,
@@ -173,7 +170,7 @@ export default function Auth() {
         redirectTo: `${window.location.origin}/reset-password`,
       });
       if (error) throw error;
-      toast.success('Password reset link sent to your email! Link expires in 30 minutes.');
+      toast.success('Password reset link sent to your email!');
     } catch (error) {
       toast.error(error instanceof Error ? error.message : 'An error occurred');
     }
@@ -195,289 +192,327 @@ export default function Auth() {
     setUsername(suggestion);
   };
 
-  // Calculate max date (16 years ago from today)
   const maxDate = new Date();
   maxDate.setFullYear(maxDate.getFullYear() - 16);
   const maxDateString = maxDate.toISOString().split('T')[0];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex flex-col items-center justify-center p-4">
-      <div className="max-w-md w-full space-y-8 bg-white p-8 rounded-xl shadow-lg">
-        <div className="text-center">
-          <LogIn className="mx-auto h-12 w-12 text-indigo-600" />
-          <h2 className="mt-6 text-3xl font-extrabold text-gray-900">
-            {isSignUp ? 'Create an account' : 'Welcome back'}
-          </h2>
-          <p className="mt-2 text-sm text-gray-600">
-            {isSignUp ? 'Sign up to get started' : 'Please sign in to your account'}
-          </p>
+    <div className="min-h-screen flex">
+      {/* Left Side - Branding */}
+      <motion.div 
+        initial={{ opacity: 0, x: -50 }}
+        animate={{ opacity: 1, x: 0 }}
+        transition={{ duration: 0.6 }}
+        className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-primary via-purple-600 to-pink-500 relative overflow-hidden"
+      >
+        {/* Animated background elements */}
+        <div className="absolute inset-0">
+          <div className="absolute top-1/4 left-1/4 w-64 h-64 bg-white/10 rounded-full blur-3xl animate-pulse-slow" />
+          <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-white/5 rounded-full blur-3xl animate-pulse-slow" style={{ animationDelay: '1s' }} />
+          <div className="absolute top-1/2 left-1/2 w-48 h-48 bg-white/10 rounded-full blur-2xl animate-pulse-slow" style={{ animationDelay: '2s' }} />
         </div>
 
-        <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-          <div className="space-y-4">
-            {isSignUp && (
-              <>
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label htmlFor="firstName" className="block text-sm font-medium text-gray-700">
-                      First Name
-                    </label>
-                    <input
-                      id="firstName"
-                      name="firstName"
-                      type="text"
-                      required
-                      value={firstName}
-                      onChange={(e) => setFirstName(e.target.value)}
-                      className="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                      placeholder="Hasan"
-                    />
-                  </div>
-                  <div>
-                    <label htmlFor="lastName" className="block text-sm font-medium text-gray-700">
-                      Last Name
-                    </label>
-                    <input
-                      id="lastName"
-                      name="lastName"
-                      type="text"
-                      required
-                      value={lastName}
-                      onChange={(e) => setLastName(e.target.value)}
-                      className="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                      placeholder="Shahid"
-                    />
-                  </div>
-                </div>
+        {/* Content */}
+        <div className="relative z-10 flex flex-col justify-center px-12 xl:px-20 text-white">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3, duration: 0.6 }}
+          >
+            <div className="flex items-center gap-3 mb-8">
+              <Globe className="h-12 w-12" />
+              <h1 className="text-4xl font-bold">Flydex</h1>
+            </div>
+            
+            <h2 className="text-3xl xl:text-4xl font-bold mb-6 leading-tight">
+              {isSignUp ? 'Join our community today' : 'Welcome back to Flydex'}
+            </h2>
+            
+            <p className="text-lg xl:text-xl text-white/80 mb-8 max-w-md">
+              {isSignUp 
+                ? 'Connect with friends, share moments, and discover new experiences together.'
+                : 'Sign in to continue your journey and stay connected with your community.'
+              }
+            </p>
 
-                <div>
-                  <label htmlFor="dateOfBirth" className="block text-sm font-medium text-gray-700">
-                    Date of Birth
-                  </label>
-                  <div className="mt-1 relative">
-                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                      <Calendar className="h-5 w-5 text-gray-400" />
-                    </div>
-                    <input
-                      id="dateOfBirth"
-                      name="dateOfBirth"
-                      type="date"
-                      required
-                      max={maxDateString}
-                      value={dateOfBirth}
-                      onChange={(e) => setDateOfBirth(e.target.value)}
-                      className="appearance-none relative block w-full px-3 py-2 pl-10 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                    />
-                  </div>
-                  <p className="mt-1 text-sm text-gray-500">
-                    You must be at least 16 years old to register
-                  </p>
-                </div>
+            {/* Features */}
+            <div className="space-y-4">
+              {[
+                'Share photos and stories with friends',
+                'Real-time messaging and chat',
+                'Discover trending content',
+                'Build your social network'
+              ].map((feature, index) => (
+                <motion.div
+                  key={feature}
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.5 + index * 0.1, duration: 0.4 }}
+                  className="flex items-center gap-3"
+                >
+                  <div className="w-2 h-2 rounded-full bg-white/80" />
+                  <span className="text-white/90">{feature}</span>
+                </motion.div>
+              ))}
+            </div>
+          </motion.div>
+        </div>
 
-                <div>
-                  <label htmlFor="username" className="block text-sm font-medium text-gray-700">
-                    Username
-                  </label>
-                  <div className="mt-1 relative">
-                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                      <User className="h-5 w-5 text-gray-400" />
-                    </div>
-                    <input
-                      id="username"
-                      name="username"
-                      type="text"
-                      required
-                      value={username}
-                      onChange={(e) => setUsername(e.target.value)}
-                      className="appearance-none relative block w-full px-3 py-2 pl-10 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                      placeholder="Choose a username"
-                    />
-                  </div>
-                  {suggestedUsernames.length > 0 && (
-                    <div className="mt-2">
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Suggested usernames:
-                      </label>
-                      <div className="flex flex-wrap gap-2">
-                        {suggestedUsernames.map((suggestion) => (
-                          <button
-                            key={suggestion}
-                            type="button"
-                            onClick={() => handleUsernameSelect(suggestion)}
-                            className="px-3 py-1 text-sm bg-gray-100 text-gray-700 rounded-full hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-                          >
-                            {suggestion}
-                          </button>
-                        ))}
+        {/* Decorative elements */}
+        <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-black/20 to-transparent" />
+      </motion.div>
+
+      {/* Right Side - Form */}
+      <motion.div 
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.5 }}
+        className="w-full lg:w-1/2 flex items-center justify-center p-6 sm:p-8 lg:p-12 bg-background"
+      >
+        <div className="w-full max-w-md">
+          {/* Mobile Logo */}
+          <div className="lg:hidden flex items-center justify-center gap-3 mb-8">
+            <Globe className="h-10 w-10 text-primary" />
+            <h1 className="text-3xl font-bold text-foreground">Flydex</h1>
+          </div>
+
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={isSignUp ? 'signup' : 'signin'}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              transition={{ duration: 0.3 }}
+            >
+              <div className="text-center mb-8">
+                <h2 className="text-2xl sm:text-3xl font-bold text-foreground">
+                  {isSignUp ? 'Create your account' : 'Sign in to your account'}
+                </h2>
+                <p className="mt-2 text-muted-foreground">
+                  {isSignUp ? 'Start your journey with us' : 'Enter your credentials to continue'}
+                </p>
+              </div>
+
+              <form className="space-y-5" onSubmit={handleSubmit}>
+                {isSignUp && (
+                  <>
+                    {/* Name fields */}
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <label htmlFor="firstName" className="block text-sm font-medium text-foreground mb-1.5">
+                          First Name
+                        </label>
+                        <input
+                          id="firstName"
+                          type="text"
+                          required
+                          value={firstName}
+                          onChange={(e) => setFirstName(e.target.value)}
+                          className="w-full px-4 py-3 border border-input rounded-lg bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring transition-all"
+                          placeholder="John"
+                        />
+                      </div>
+                      <div>
+                        <label htmlFor="lastName" className="block text-sm font-medium text-foreground mb-1.5">
+                          Last Name
+                        </label>
+                        <input
+                          id="lastName"
+                          type="text"
+                          required
+                          value={lastName}
+                          onChange={(e) => setLastName(e.target.value)}
+                          className="w-full px-4 py-3 border border-input rounded-lg bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring transition-all"
+                          placeholder="Doe"
+                        />
                       </div>
                     </div>
-                  )}
-                </div>
-              </>
-            )}
 
-            <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700">
-                Email address
-              </label>
-              <div className="mt-1 relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Mail className="h-5 w-5 text-gray-400" />
-                </div>
-                <input
-                  id="email"
-                  name="email"
-                  type="email"
-                  autoComplete="email"
-                  required
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="appearance-none relative block w-full px-3 py-2 pl-10 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                  placeholder="Email address"
-                />
-              </div>
-            </div>
+                    {/* Date of Birth */}
+                    <div>
+                      <label htmlFor="dateOfBirth" className="block text-sm font-medium text-foreground mb-1.5">
+                        Date of Birth
+                      </label>
+                      <div className="relative">
+                        <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                        <input
+                          id="dateOfBirth"
+                          type="date"
+                          required
+                          max={maxDateString}
+                          value={dateOfBirth}
+                          onChange={(e) => setDateOfBirth(e.target.value)}
+                          className="w-full px-4 py-3 pl-11 border border-input rounded-lg bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-ring transition-all"
+                        />
+                      </div>
+                      <p className="mt-1.5 text-xs text-muted-foreground">
+                        You must be at least 16 years old
+                      </p>
+                    </div>
 
-            <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700">
-                Password
-              </label>
-              <div className="mt-1 relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Lock className="h-5 w-5 text-gray-400" />
+                    {/* Username */}
+                    <div>
+                      <label htmlFor="username" className="block text-sm font-medium text-foreground mb-1.5">
+                        Username
+                      </label>
+                      <div className="relative">
+                        <User className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                        <input
+                          id="username"
+                          type="text"
+                          required
+                          value={username}
+                          onChange={(e) => setUsername(e.target.value)}
+                          className="w-full px-4 py-3 pl-11 border border-input rounded-lg bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring transition-all"
+                          placeholder="Choose a username"
+                        />
+                      </div>
+                      {suggestedUsernames.length > 0 && (
+                        <div className="mt-2 flex flex-wrap gap-2">
+                          {suggestedUsernames.slice(0, 3).map((suggestion) => (
+                            <button
+                              key={suggestion}
+                              type="button"
+                              onClick={() => handleUsernameSelect(suggestion)}
+                              className="px-3 py-1 text-xs bg-secondary text-secondary-foreground rounded-full hover:bg-secondary/80 transition-colors"
+                            >
+                              {suggestion}
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  </>
+                )}
+
+                {/* Email */}
+                <div>
+                  <label htmlFor="email" className="block text-sm font-medium text-foreground mb-1.5">
+                    Email address
+                  </label>
+                  <div className="relative">
+                    <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                    <input
+                      id="email"
+                      type="email"
+                      autoComplete="email"
+                      required
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      className="w-full px-4 py-3 pl-11 border border-input rounded-lg bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring transition-all"
+                      placeholder="you@example.com"
+                    />
+                  </div>
                 </div>
-                <input
-                  id="password"
-                  name="password"
-                  type={showPassword ? "text" : "password"}
-                  autoComplete={isSignUp ? 'new-password' : 'current-password'}
-                  required
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="appearance-none relative block w-full px-3 py-2 pl-10 pr-10 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                  placeholder="Password (min 6 characters)"
-                />
+
+                {/* Password */}
+                <div>
+                  <label htmlFor="password" className="block text-sm font-medium text-foreground mb-1.5">
+                    Password
+                  </label>
+                  <div className="relative">
+                    <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                    <input
+                      id="password"
+                      type={showPassword ? "text" : "password"}
+                      autoComplete={isSignUp ? 'new-password' : 'current-password'}
+                      required
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      className="w-full px-4 py-3 pl-11 pr-11 border border-input rounded-lg bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring transition-all"
+                      placeholder="••••••••"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                    >
+                      {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                    </button>
+                  </div>
+                </div>
+
+                {/* Confirm Password (Sign Up only) */}
+                {isSignUp && (
+                  <div>
+                    <label htmlFor="confirmPassword" className="block text-sm font-medium text-foreground mb-1.5">
+                      Confirm Password
+                    </label>
+                    <div className="relative">
+                      <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                      <input
+                        id="confirmPassword"
+                        type={showConfirmPassword ? "text" : "password"}
+                        autoComplete="new-password"
+                        required
+                        value={confirmPassword}
+                        onChange={(e) => setConfirmPassword(e.target.value)}
+                        className="w-full px-4 py-3 pl-11 pr-11 border border-input rounded-lg bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring transition-all"
+                        placeholder="••••••••"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                        className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                      >
+                        {showConfirmPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                {/* Forgot Password (Sign In only) */}
+                {!isSignUp && (
+                  <div className="flex items-center justify-end">
+                    <button
+                      type="button"
+                      onClick={handleForgotPassword}
+                      className="text-sm font-medium text-primary hover:text-primary/80 transition-colors"
+                    >
+                      Forgot your password?
+                    </button>
+                  </div>
+                )}
+
+                {/* Submit Button */}
                 <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                  type="submit"
+                  disabled={isLoading}
+                  className={cn(
+                    "w-full flex items-center justify-center gap-2 py-3 px-4 rounded-lg font-medium transition-all",
+                    "bg-primary text-primary-foreground hover:bg-primary/90",
+                    "focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2",
+                    "disabled:opacity-50 disabled:cursor-not-allowed"
+                  )}
                 >
-                  {showPassword ? (
-                    <EyeOff className="h-5 w-5 text-gray-400" />
+                  {isLoading ? (
+                    <div className="h-5 w-5 border-2 border-current border-t-transparent rounded-full animate-spin" />
                   ) : (
-                    <Eye className="h-5 w-5 text-gray-400" />
+                    <>
+                      {isSignUp ? 'Create Account' : 'Sign In'}
+                      <ArrowRight className="h-5 w-5" />
+                    </>
                   )}
                 </button>
-              </div>
-            </div>
+              </form>
 
-            {isSignUp && (
-              <div>
-                <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700">
-                  Confirm Password
-                </label>
-                <div className="mt-1 relative">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <Lock className="h-5 w-5 text-gray-400" />
-                  </div>
-                  <input
-                    id="confirmPassword"
-                    name="confirmPassword"
-                    type={showConfirmPassword ? "text" : "password"}
-                    autoComplete="new-password"
-                    required
-                    value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
-                    className="appearance-none relative block w-full px-3 py-2 pl-10 pr-10 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                    placeholder="Confirm password"
-                  />
+              {/* Toggle Sign Up / Sign In */}
+              <div className="mt-8 text-center">
+                <p className="text-muted-foreground">
+                  {isSignUp ? 'Already have an account?' : "Don't have an account?"}{' '}
                   <button
                     type="button"
-                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                    className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                    onClick={toggleSignUp}
+                    className="font-medium text-primary hover:text-primary/80 transition-colors"
                   >
-                    {showConfirmPassword ? (
-                      <EyeOff className="h-5 w-5 text-gray-400" />
-                    ) : (
-                      <Eye className="h-5 w-5 text-gray-400" />
-                    )}
+                    {isSignUp ? 'Sign in' : 'Sign up'}
                   </button>
-                </div>
+                </p>
               </div>
-            )}
-          </div>
-
-          {!isSignUp && (
-            <div className="flex items-center justify-between">
-              <div className="flex items-center">
-                <input
-                  id="remember-me"
-                  name="remember-me"
-                  type="checkbox"
-                  className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
-                />
-                <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-900">
-                  Remember me
-                </label>
-              </div>
-
-              <div className="text-sm">
-                <button
-                  type="button"
-                  onClick={handleForgotPassword}
-                  className="font-medium text-indigo-600 hover:text-indigo-500"
-                >
-                  Forgot your password?
-                </button>
-              </div>
-            </div>
-          )}
-
-          <div>
-            <button
-              type="submit"
-              disabled={isLoading}
-              className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-lg text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {isLoading ? (
-                <span className="flex items-center">
-                  <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                  </svg>
-                  Processing...
-                </span>
-              ) : (
-                isSignUp ? 'Sign up' : 'Sign in'
-              )}
-            </button>
-          </div>
-
-          <div className="text-center text-sm">
-            <span className="text-gray-600">
-              {isSignUp ? 'Already have an account?' : "Don't have an account?"}
-            </span>
-            {' '}
-            <button
-              type="button"
-              onClick={toggleSignUp}
-              className="font-medium text-indigo-600 hover:text-indigo-500"
-            >
-              {isSignUp ? 'Sign in' : 'Sign up'}
-            </button>
-          </div>
-        </form>
-      </div>
-
-      {/* GlideX branding */}
-      <div className="mt-8 text-center">
-        <p className="text-sm text-gray-500">
-          Powered by{' '}
-          <span className="font-semibold bg-gradient-to-r from-indigo-500 to-purple-500 bg-clip-text text-transparent">
-            GlideX
-          </span>
-        </p>
-      </div>
+            </motion.div>
+          </AnimatePresence>
+        </div>
+      </motion.div>
     </div>
   );
 }
