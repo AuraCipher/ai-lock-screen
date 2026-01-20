@@ -114,13 +114,13 @@ export default function Dashboard({ session }) {
     try {
       const { data: friendRequests, error: friendError } = await supabase
         .from('friends')
-        .select('*, profiles:user_id(*)')
+        .select('*, profiles:profiles_public!friends_user_id_fkey(*)')
         .eq('friend_id', session.user.id)
         .eq('status', 'pending');
 
       const { data: unreadMessages, error: messageError } = await supabase
         .from('messages')
-        .select('*, profiles:user_id(*)')
+        .select('*, profiles:profiles_public!messages_user_id_fkey(*)')
         .eq('recipient_id', session.user.id)
         .eq('is_read', false);
 
