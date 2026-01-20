@@ -63,7 +63,7 @@ export default function Auth() {
   const checkUsernameExists = async (username: string) => {
     try {
       const { data, error } = await supabase
-        .from('profiles')
+        .from('profiles_public')
         .select('username')
         .eq('username', username);
       

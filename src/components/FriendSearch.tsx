@@ -23,7 +23,7 @@ export default function FriendSearch({ session, onClose }) {
   const searchUsers = async () => {
     try {
       const { data, error } = await supabase
-        .from('profiles')
+        .from('profiles_public')
         .select('id, username, avatar_url, custom_chat_name')
         .or(`username.ilike.%${searchQuery}%, custom_chat_name.ilike.%${searchQuery}%`)
         .neq('id', session.user.id)

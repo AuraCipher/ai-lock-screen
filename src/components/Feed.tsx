@@ -29,7 +29,7 @@ export default function Feed({ session }) {
 
       if (friendIds.length > 0) {
         const { data: profiles, error: profilesError } = await supabase
-          .from('profiles')
+          .from('profiles_public')
           .select('*')
           .in('id', friendIds);
 
@@ -65,7 +65,7 @@ export default function Feed({ session }) {
         .from('posts')
         .select(`
           *,
-          profiles:user_id (username, avatar_url),
+          profiles:profiles_public!posts_user_id_fkey (username, avatar_url),
           likes:likes (user_id),
           comments:comments (*)
         `)

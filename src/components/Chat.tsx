@@ -75,7 +75,7 @@ export default function Chat({ session }) {
 
       if (friendIds.length > 0) {
         const { data: profiles, error: profilesError } = await supabase
-          .from('profiles')
+          .from('profiles_public')
           .select('*')
           .in('id', friendIds);
 
@@ -98,7 +98,7 @@ export default function Chat({ session }) {
         .from('messages')
         .select(`
           *,
-          profiles:user_id (avatar_url, custom_chat_name)
+          profiles:profiles_public!messages_user_id_fkey (avatar_url, custom_chat_name)
         `)
         .or(`and(user_id.eq.${session.user.id},recipient_id.eq.${selectedUser}),and(user_id.eq.${selectedUser},recipient_id.eq.${session.user.id})`)
         .eq('is_private', true)
