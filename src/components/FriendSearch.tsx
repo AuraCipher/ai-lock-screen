@@ -1,12 +1,30 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { UserPlus, X, Check, MessageCircle } from 'lucide-react';
+import { Session } from '@supabase/supabase-js';
 import { supabase } from '../lib/supabase';
 import { toast } from 'react-hot-toast';
 
-export default function FriendSearch({ session, onClose }) {
-  const [searchResults, setSearchResults] = useState([]);
+interface SearchResult {
+  id: string;
+  username: string;
+  avatar_url: string | null;
+  custom_chat_name: string | null;
+}
+
+interface FriendshipStatus {
+  status: string;
+  sentByMe: boolean;
+}
+
+interface FriendSearchProps {
+  session: Session;
+  onClose: () => void;
+}
+
+export default function FriendSearch({ session, onClose }: FriendSearchProps) {
+  const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
-  const [pendingRequests, setPendingRequests] = useState({});
+  const [pendingRequests, setPendingRequests] = useState<Record<string, FriendshipStatus>>({});
 
   useEffect(() => {
     if (searchQuery.trim().length >= 2) {
@@ -30,7 +48,7 @@ export default function FriendSearch({ session, onClose }) {
         .limit(10);
 
       if (error) throw error;
-      setSearchResults(data || []);
+      setSearchResults((data as SearchResult[]) || []);
     } catch (error) {
       console.error('Error searching users:', error);
     }
@@ -44,12 +62,12 @@ export default function FriendSearch({ session, onClose }) {
       const { data: friendships, error } = await supabase
         .from('friends')
         .select('*')
-        .or(`and(user_id.eq.${session.user.id},friend_id.in.(${userIds.join(',')})),and(friend_id.eq.${session.user.id},user_id.in.(${userIds.join(',')}))`)
+        .or(`and(user_id.eq.${session.user.id},friend_id.in.(${userIds.join(',')})),and(friend_id.eq.${session.user.id},user_id.in.(${userIds.join(',')}))`);
 
       if (error) throw error;
 
-      const statusMap = {};
-      friendships?.forEach(friendship => {
+      const statusMap: Record<string, FriendshipStatus> = {};
+      friendships?.forEach((friendship: { user_id: string; friend_id: string; status: string }) => {
         const otherUserId = friendship.user_id === session.user.id ? friendship.friend_id : friendship.user_id;
         statusMap[otherUserId] = {
           status: friendship.status,
@@ -63,7 +81,7 @@ export default function FriendSearch({ session, onClose }) {
     }
   };
 
-  const sendFriendRequest = async (userId) => {
+  const sendFriendRequest = async (userId: string) => {
     try {
       const { error } = await supabase
         .from('friends')
@@ -84,7 +102,7 @@ export default function FriendSearch({ session, onClose }) {
     }
   };
 
-  const getFriendshipStatus = (userId) => {
+  const getFriendshipStatus = (userId: string): string | null => {
     const friendship = pendingRequests[userId];
     if (!friendship) return null;
 
@@ -96,7 +114,7 @@ export default function FriendSearch({ session, onClose }) {
     return null;
   };
 
-  const handleFriendshipAction = async (userId) => {
+  const handleFriendshipAction = async (userId: string) => {
     const status = getFriendshipStatus(userId);
     if (status === 'Accept request') {
       try {
@@ -117,15 +135,15 @@ export default function FriendSearch({ session, onClose }) {
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-start justify-center pt-20">
-      <div className="bg-white rounded-lg shadow-xl w-full max-w-md mx-4">
-        <div className="p-4 border-b border-gray-200 flex items-center justify-between">
-          <h2 className="text-lg font-semibold">Find Friends</h2>
+    <div className="fixed inset-0 bg-black/50 z-50 flex items-start justify-center pt-20">
+      <div className="bg-card rounded-lg shadow-xl w-full max-w-md mx-4 border border-border">
+        <div className="p-4 border-b border-border flex items-center justify-between">
+          <h2 className="text-lg font-semibold text-foreground">Find Friends</h2>
           <button
             onClick={onClose}
-            className="p-2 hover:bg-gray-100 rounded-full"
+            className="p-2 hover:bg-muted rounded-full transition-colors"
           >
-            <X className="h-5 w-5 text-gray-500" />
+            <X className="h-5 w-5 text-muted-foreground" />
           </button>
         </div>
         
@@ -135,7 +153,7 @@ export default function FriendSearch({ session, onClose }) {
             placeholder="Search by name or username..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+            className="w-full px-4 py-2 border border-input rounded-lg bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
           />
         </div>
 
@@ -143,7 +161,7 @@ export default function FriendSearch({ session, onClose }) {
           {searchResults.map((user) => (
             <div
               key={user.id}
-              className="p-4 border-b border-gray-100 flex items-center justify-between"
+              className="p-4 border-b border-border flex items-center justify-between"
             >
               <div className="flex items-center space-x-3">
                 <img
@@ -152,15 +170,15 @@ export default function FriendSearch({ session, onClose }) {
                   className="w-12 h-12 rounded-full"
                 />
                 <div>
-                  <p className="font-medium">{user.custom_chat_name || user.username}</p>
-                  <p className="text-sm text-gray-500">@{user.username}</p>
+                  <p className="font-medium text-foreground">{user.custom_chat_name || user.username}</p>
+                  <p className="text-sm text-muted-foreground">@{user.username}</p>
                 </div>
               </div>
 
               <div className="flex items-center space-x-2">
                 {getFriendshipStatus(user.id) === 'Friends' ? (
                   <button
-                    className="p-2 text-indigo-600 hover:bg-indigo-50 rounded-full"
+                    className="p-2 text-primary hover:bg-primary/10 rounded-full transition-colors"
                     onClick={() => {/* Handle chat */}}
                   >
                     <MessageCircle className="h-5 w-5" />
@@ -169,12 +187,12 @@ export default function FriendSearch({ session, onClose }) {
                   <button
                     onClick={() => handleFriendshipAction(user.id)}
                     disabled={getFriendshipStatus(user.id) === 'Request sent'}
-                    className={`flex items-center space-x-1 px-3 py-1 rounded-full ${
+                    className={`flex items-center space-x-1 px-3 py-1 rounded-full transition-colors ${
                       getFriendshipStatus(user.id) === 'Request sent'
-                        ? 'bg-gray-100 text-gray-500'
+                        ? 'bg-muted text-muted-foreground'
                         : getFriendshipStatus(user.id) === 'Accept request'
-                        ? 'bg-indigo-600 text-white hover:bg-indigo-700'
-                        : 'bg-indigo-50 text-indigo-600 hover:bg-indigo-100'
+                        ? 'bg-primary text-primary-foreground hover:bg-primary/90'
+                        : 'bg-primary/10 text-primary hover:bg-primary/20'
                     }`}
                   >
                     {getFriendshipStatus(user.id) === 'Accept request' ? (
@@ -190,13 +208,13 @@ export default function FriendSearch({ session, onClose }) {
           ))}
 
           {searchQuery.length >= 2 && searchResults.length === 0 && (
-            <div className="p-4 text-center text-gray-500">
+            <div className="p-4 text-center text-muted-foreground">
               No users found
             </div>
           )}
 
           {searchQuery.length < 2 && (
-            <div className="p-4 text-center text-gray-500">
+            <div className="p-4 text-center text-muted-foreground">
               Enter at least 2 characters to search
             </div>
           )}

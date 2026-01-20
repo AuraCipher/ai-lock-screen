@@ -1,5 +1,6 @@
-import React, { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, FormEvent } from 'react';
 import { Send, Search, Phone, Video, Info, ArrowLeft, Lock, Unlock, Settings } from 'lucide-react';
+import { Session } from '@supabase/supabase-js';
 import { supabase } from '../lib/supabase';
 import { toast } from 'react-hot-toast';
 
@@ -26,16 +27,18 @@ interface Profile {
   chat_locker_password: string;
 }
 
-export default function Chat({ session }) {
+interface ChatProps {
+  session: Session;
+}
+
+export default function Chat({ session }: ChatProps) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState('');
   const [selectedUser, setSelectedUser] = useState<string | null>(null);
   const [users, setUsers] = useState<Profile[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [showLockedChats, setShowLockedChats] = useState(false);
-  const [showSettings, setShowSettings] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const channelRef = useRef<any>(null);
 
   useEffect(() => {
     fetchUsers();
@@ -69,7 +72,7 @@ export default function Chat({ session }) {
 
       if (friendshipsError) throw friendshipsError;
 
-      const friendIds = friendships?.map(friendship => 
+      const friendIds = friendships?.map((friendship: { user_id: string; friend_id: string }) => 
         friendship.user_id === session.user.id ? friendship.friend_id : friendship.user_id
       ) || [];
 
@@ -80,7 +83,7 @@ export default function Chat({ session }) {
           .in('id', friendIds);
 
         if (profilesError) throw profilesError;
-        setUsers(profiles || []);
+        setUsers((profiles as Profile[]) || []);
       } else {
         setUsers([]);
       }
@@ -105,18 +108,17 @@ export default function Chat({ session }) {
         .order('created_at', { ascending: true });
 
       if (error) throw error;
-      setMessages(data || []);
+      setMessages((data as Message[]) || []);
 
-      // Mark messages as read
-      const unreadMessages = data?.filter(msg => 
-        msg.recipient_id === session.user.id && !msg.is_read
+      const unreadMessages = data?.filter((msg: Message) => 
+        msg.recipient_id === session.user.id && !(msg as { is_read?: boolean }).is_read
       ) || [];
 
       if (unreadMessages.length > 0) {
         const { error: updateError } = await supabase
           .from('messages')
           .update({ is_read: true })
-          .in('id', unreadMessages.map(msg => msg.id));
+          .in('id', unreadMessages.map((msg: Message) => msg.id));
 
         if (updateError) throw updateError;
       }
@@ -138,10 +140,11 @@ export default function Chat({ session }) {
           filter: `recipient_id=eq.${session.user.id}`,
         },
         (payload) => {
-          if (payload.new.is_private && 
-              ((payload.new.user_id === session.user.id && payload.new.recipient_id === selectedUser) || 
-               (payload.new.user_id === selectedUser && payload.new.recipient_id === session.user.id))) {
-            setMessages(current => [...current, payload.new as Message]);
+          const newMsg = payload.new as Message & { is_private?: boolean };
+          if (newMsg.is_private && 
+              ((newMsg.user_id === session.user.id && newMsg.recipient_id === selectedUser) || 
+               (newMsg.user_id === selectedUser && newMsg.recipient_id === session.user.id))) {
+            setMessages(current => [...current, newMsg]);
             scrollToBottom();
           }
         }
@@ -151,7 +154,7 @@ export default function Chat({ session }) {
     return channel;
   };
 
-  const handleSendMessage = async (e: React.FormEvent) => {
+  const handleSendMessage = async (e: FormEvent) => {
     e.preventDefault();
     if (!newMessage.trim() || !selectedUser) return;
 
@@ -182,7 +185,6 @@ export default function Chat({ session }) {
 
       if (error) throw error;
 
-      // Optimistically update UI
       setMessages(current => [...current, {
         ...newMsg,
         id: crypto.randomUUID(),
@@ -252,18 +254,17 @@ export default function Chat({ session }) {
   const selectedUserData = users.find(u => u.id === selectedUser);
 
   return (
-    <div className="h-[calc(100vh-12rem)] bg-white rounded-lg shadow-lg overflow-hidden">
+    <div className="h-[calc(100vh-12rem)] bg-card rounded-lg shadow-lg overflow-hidden border border-border">
       {!selectedUser ? (
-        // Chat list view
         <div className="flex flex-col h-full">
-          <div className="p-4 border-b border-gray-100">
+          <div className="p-4 border-b border-border">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xl font-semibold text-gray-800">Messages</h2>
+              <h2 className="text-xl font-semibold text-foreground">Messages</h2>
               <div className="flex items-center space-x-2">
                 <button
                   onClick={() => setShowLockedChats(!showLockedChats)}
-                  className={`p-2 rounded-full ${
-                    showLockedChats ? 'bg-indigo-100 text-indigo-600' : 'hover:bg-gray-100'
+                  className={`p-2 rounded-full transition-colors ${
+                    showLockedChats ? 'bg-primary/10 text-primary' : 'hover:bg-muted'
                   }`}
                 >
                   {showLockedChats ? (
@@ -273,21 +274,20 @@ export default function Chat({ session }) {
                   )}
                 </button>
                 <button
-                  onClick={() => setShowSettings(true)}
-                  className="p-2 hover:bg-gray-100 rounded-full"
+                  className="p-2 hover:bg-muted rounded-full transition-colors"
                 >
-                  <Settings className="h-5 w-5 text-gray-600" />
+                  <Settings className="h-5 w-5 text-muted-foreground" />
                 </button>
               </div>
             </div>
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-5 w-5" />
               <input
                 type="text"
                 placeholder="Search messages"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-full focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                className="w-full pl-10 pr-4 py-2 bg-muted border border-border rounded-full focus:outline-none focus:ring-2 focus:ring-ring text-foreground placeholder:text-muted-foreground"
               />
             </div>
           </div>
@@ -296,7 +296,7 @@ export default function Chat({ session }) {
             {filteredUsers.map((user) => (
               <div
                 key={user.id}
-                className="p-4 flex items-center justify-between hover:bg-gray-50 transition-colors border-b border-gray-100 cursor-pointer"
+                className="p-4 flex items-center justify-between hover:bg-muted transition-colors border-b border-border cursor-pointer"
               >
                 <button
                   onClick={() => setSelectedUser(user.id)}
@@ -308,23 +308,23 @@ export default function Chat({ session }) {
                       alt=""
                       className="w-14 h-14 rounded-full object-cover"
                     />
-                    <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 border-white"></div>
+                    <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 border-card"></div>
                   </div>
                   <div className="flex-1 min-w-0">
-                    <h3 className="font-medium text-gray-900 text-left">
+                    <h3 className="font-medium text-foreground text-left">
                       {user.custom_chat_name || user.username}
                     </h3>
-                    <p className="text-sm text-gray-500 truncate text-left">
+                    <p className="text-sm text-muted-foreground truncate text-left">
                       Tap to start chatting
                     </p>
                   </div>
                 </button>
                 <button
                   onClick={() => toggleChatLock(user.id)}
-                  className={`p-2 rounded-full ml-2 ${
+                  className={`p-2 rounded-full ml-2 transition-colors ${
                     user.chat_locked
-                      ? 'bg-indigo-100 text-indigo-600'
-                      : 'hover:bg-gray-100'
+                      ? 'bg-primary/10 text-primary'
+                      : 'hover:bg-muted'
                   }`}
                 >
                   {user.chat_locked ? (
@@ -338,14 +338,13 @@ export default function Chat({ session }) {
           </div>
         </div>
       ) : (
-        // Chat conversation view
-        <div className="flex flex-col h-full bg-gray-50">
-          <div className="flex items-center p-4 border-b border-gray-200 bg-white">
+        <div className="flex flex-col h-full bg-muted/50">
+          <div className="flex items-center p-4 border-b border-border bg-card">
             <button
               onClick={() => setSelectedUser(null)}
-              className="p-1 hover:bg-gray-100 rounded-full mr-2"
+              className="p-1 hover:bg-muted rounded-full mr-2 transition-colors"
             >
-              <ArrowLeft className="h-6 w-6 text-gray-600" />
+              <ArrowLeft className="h-6 w-6 text-muted-foreground" />
             </button>
             <img
               src={selectedUserData?.avatar_url || `https://api.dicebear.com/7.x/initials/svg?seed=${selectedUserData?.id}`}
@@ -353,27 +352,27 @@ export default function Chat({ session }) {
               className="w-10 h-10 rounded-full object-cover"
             />
             <div className="ml-3 flex-1">
-              <h3 className="font-medium text-gray-900">
+              <h3 className="font-medium text-foreground">
                 {selectedUserData?.custom_chat_name || selectedUserData?.username}
               </h3>
-              <p className="text-sm text-gray-500">Active now</p>
+              <p className="text-sm text-muted-foreground">Active now</p>
             </div>
             <div className="flex items-center space-x-2">
-              <button className="p-2 hover:bg-gray-100 rounded-full">
-                <Phone className="h-5 w-5 text-gray-600" />
+              <button className="p-2 hover:bg-muted rounded-full transition-colors">
+                <Phone className="h-5 w-5 text-muted-foreground" />
               </button>
-              <button className="p-2 hover:bg-gray-100 rounded-full">
-                <Video className="h-5 w-5 text-gray-600" />
+              <button className="p-2 hover:bg-muted rounded-full transition-colors">
+                <Video className="h-5 w-5 text-muted-foreground" />
               </button>
-              <button className="p-2 hover:bg-gray-100 rounded-full">
-                <Info className="h-5 w-5 text-gray-600" />
+              <button className="p-2 hover:bg-muted rounded-full transition-colors">
+                <Info className="h-5 w-5 text-muted-foreground" />
               </button>
               <button
                 onClick={() => toggleChatLock(selectedUserData?.id || '')}
-                className={`p-2 rounded-full ${
+                className={`p-2 rounded-full transition-colors ${
                   selectedUserData?.chat_locked
-                    ? 'bg-indigo-100 text-indigo-600'
-                    : 'hover:bg-gray-100'
+                    ? 'bg-primary/10 text-primary'
+                    : 'hover:bg-muted'
                 }`}
               >
                 {selectedUserData?.chat_locked ? (
@@ -396,8 +395,8 @@ export default function Chat({ session }) {
                 <div
                   className={`max-w-[70%] rounded-2xl px-4 py-2 ${
                     message.user_id === session.user.id
-                      ? 'bg-indigo-500 text-white'
-                      : 'bg-white text-gray-900'
+                      ? 'bg-primary text-primary-foreground'
+                      : 'bg-card text-foreground'
                   }`}
                 >
                   <p className="text-sm">{message.content}</p>
@@ -415,7 +414,7 @@ export default function Chat({ session }) {
 
           <form
             onSubmit={handleSendMessage}
-            className="p-4 bg-white border-t border-gray-200"
+            className="p-4 bg-card border-t border-border"
           >
             <div className="flex items-center space-x-2">
               <input
@@ -423,12 +422,12 @@ export default function Chat({ session }) {
                 value={newMessage}
                 onChange={(e) => setNewMessage(e.target.value)}
                 placeholder="Message..."
-                className="flex-1 px-4 py-2 bg-gray-50 border border-gray-200 rounded-full focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                className="flex-1 px-4 py-2 bg-muted border border-border rounded-full focus:outline-none focus:ring-2 focus:ring-ring text-foreground placeholder:text-muted-foreground"
               />
               <button
                 type="submit"
                 disabled={!newMessage.trim()}
-                className="p-2 text-indigo-600 hover:text-indigo-700 rounded-full hover:bg-indigo-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="p-2 text-primary hover:text-primary/80 rounded-full hover:bg-primary/10 focus:outline-none focus:ring-2 focus:ring-ring disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               >
                 <Send className="w-5 h-5" />
               </button>
