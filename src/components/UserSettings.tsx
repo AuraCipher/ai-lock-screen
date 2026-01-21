@@ -1,26 +1,16 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { 
   ChevronRight, 
   ChevronLeft,
   User, 
-  Bell, 
-  Shield, 
-  Lock, 
-  HelpCircle, 
-  Info, 
   LogOut,
   Moon,
   Sun,
   Palette,
-  MessageCircle,
   Key,
-  UserPlus,
-  Eye,
-  AlertCircle,
-  Mail
+  UserPlus
 } from 'lucide-react';
-import { toast } from 'react-hot-toast';
-import { supabase } from '../lib/supabase';
+import { Session } from '@supabase/supabase-js';
 
 interface Theme {
   name: string;
@@ -30,6 +20,19 @@ interface Theme {
     background: string;
     text: string;
   };
+}
+
+interface Profile {
+  id: string;
+  username: string;
+  avatar_url: string | null;
+  bio: string | null;
+}
+
+interface UserSettingsProps {
+  session: Session;
+  profile: Profile | null;
+  onSignOut: () => void;
 }
 
 const defaultThemes: Theme[] = [
@@ -71,8 +74,10 @@ const defaultThemes: Theme[] = [
   },
 ];
 
-export default function UserSettings({ session, profile, onSignOut }) {
-  const [activeSection, setActiveSection] = useState(null);
+type SectionType = 'personal' | 'security' | 'friends' | 'theme' | null;
+
+export default function UserSettings({ onSignOut }: UserSettingsProps) {
+  const [activeSection, setActiveSection] = useState<SectionType>(null);
   const [currentTheme, setCurrentTheme] = useState('light');
   const [customTheme, setCustomTheme] = useState<Theme>({
     name: 'custom',
@@ -161,12 +166,11 @@ export default function UserSettings({ session, profile, onSignOut }) {
         }
       ]
     },
-    // ... other sections remain the same
   ];
 
   const renderThemeSettings = () => (
     <div className="space-y-6">
-      <h2 className="text-xl font-semibold">Theme Settings</h2>
+      <h2 className="text-xl font-semibold text-foreground">Theme Settings</h2>
       
       {/* Theme Selection */}
       <div className="grid grid-cols-2 gap-4">
@@ -176,25 +180,25 @@ export default function UserSettings({ session, profile, onSignOut }) {
             onClick={() => handleThemeChange(theme.name)}
             className={`p-4 rounded-lg border-2 transition-all ${
               currentTheme === theme.name
-                ? 'border-indigo-500 bg-indigo-50'
-                : 'border-gray-200 hover:border-indigo-200'
+                ? 'border-primary bg-primary/10'
+                : 'border-border hover:border-primary/50'
             }`}
           >
             <div className="flex items-center space-x-2">
               {theme.name === 'light' ? (
-                <Sun className="h-5 w-5" />
+                <Sun className="h-5 w-5 text-foreground" />
               ) : theme.name === 'dark' ? (
-                <Moon className="h-5 w-5" />
+                <Moon className="h-5 w-5 text-foreground" />
               ) : (
-                <Palette className="h-5 w-5" />
+                <Palette className="h-5 w-5 text-foreground" />
               )}
-              <span className="capitalize">{theme.name}</span>
+              <span className="capitalize text-foreground">{theme.name}</span>
             </div>
             <div className="mt-2 flex space-x-2">
               {Object.values(theme.colors).map((color, index) => (
                 <div
                   key={index}
-                  className="w-6 h-6 rounded-full"
+                  className="w-6 h-6 rounded-full border border-border"
                   style={{ backgroundColor: color }}
                 />
               ))}
@@ -205,11 +209,11 @@ export default function UserSettings({ session, profile, onSignOut }) {
 
       {/* Custom Theme */}
       <div className="mt-8">
-        <h3 className="text-lg font-medium mb-4">Custom Theme</h3>
+        <h3 className="text-lg font-medium mb-4 text-foreground">Custom Theme</h3>
         <div className="space-y-4">
           {Object.entries(customTheme.colors).map(([key, value]) => (
             <div key={key} className="flex items-center space-x-4">
-              <label className="w-24 capitalize">{key}:</label>
+              <label className="w-24 capitalize text-foreground">{key}:</label>
               <input
                 type="color"
                 value={value}
@@ -220,7 +224,7 @@ export default function UserSettings({ session, profile, onSignOut }) {
                 type="text"
                 value={value}
                 onChange={(e) => handleCustomThemeChange(e.target.value, key as keyof Theme['colors'])}
-                className="px-2 py-1 border rounded"
+                className="px-2 py-1 border border-input rounded bg-background text-foreground"
               />
             </div>
           ))}
@@ -228,8 +232,8 @@ export default function UserSettings({ session, profile, onSignOut }) {
             onClick={() => handleThemeChange('custom')}
             className={`mt-4 px-4 py-2 rounded-lg ${
               currentTheme === 'custom'
-                ? 'bg-indigo-600 text-white'
-                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                ? 'bg-primary text-primary-foreground'
+                : 'bg-muted text-foreground hover:bg-muted/80'
             }`}
           >
             Apply Custom Theme
@@ -243,32 +247,31 @@ export default function UserSettings({ session, profile, onSignOut }) {
     switch (activeSection) {
       case 'theme':
         return renderThemeSettings();
-      // ... other sections remain the same
       default:
         return (
-          <div className="divide-y divide-gray-100">
+          <div className="divide-y divide-border">
             {settingsSections.map((section) => (
               <div key={section.id} className="py-6">
                 <div className="flex items-center mb-4">
-                  <section.icon className="h-6 w-6 text-gray-600 mr-2" />
-                  <h2 className="text-lg font-semibold">{section.title}</h2>
+                  <section.icon className="h-6 w-6 text-muted-foreground mr-2" />
+                  <h2 className="text-lg font-semibold text-foreground">{section.title}</h2>
                 </div>
                 <div className="space-y-2">
                   {section.items.map((item) => (
                     <button
                       key={item.title}
                       onClick={item.onClick}
-                      className="w-full text-left px-4 py-3 bg-white rounded-lg shadow hover:bg-gray-50 transition-colors"
+                      className="w-full text-left px-4 py-3 bg-card rounded-lg shadow hover:bg-muted transition-colors border border-border"
                     >
                       <div className="flex items-center justify-between">
                         <div className="flex items-center space-x-3">
-                          <item.icon className="h-5 w-5 text-gray-500" />
+                          <item.icon className="h-5 w-5 text-muted-foreground" />
                           <div>
-                            <p className="font-medium">{item.title}</p>
-                            <p className="text-sm text-gray-500">{item.description}</p>
+                            <p className="font-medium text-foreground">{item.title}</p>
+                            <p className="text-sm text-muted-foreground">{item.description}</p>
                           </div>
                         </div>
-                        <ChevronRight className="h-5 w-5 text-gray-400" />
+                        <ChevronRight className="h-5 w-5 text-muted-foreground" />
                       </div>
                     </button>
                   ))}
@@ -278,7 +281,7 @@ export default function UserSettings({ session, profile, onSignOut }) {
             
             <button
               onClick={onSignOut}
-              className="w-full mt-6 px-4 py-3 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 transition-colors flex items-center justify-center space-x-2"
+              className="w-full mt-6 px-4 py-3 bg-destructive/10 text-destructive rounded-lg hover:bg-destructive/20 transition-colors flex items-center justify-center space-x-2"
             >
               <LogOut className="h-5 w-5" />
               <span>Sign Out</span>
@@ -291,15 +294,15 @@ export default function UserSettings({ session, profile, onSignOut }) {
   return (
     <div className="max-w-2xl mx-auto">
       {activeSection ? (
-        <div className="bg-white rounded-lg shadow-sm p-6">
+        <div className="bg-card rounded-lg shadow-sm p-6 border border-border">
           <div className="flex items-center space-x-2 mb-6">
             <button
               onClick={() => setActiveSection(null)}
-              className="p-2 hover:bg-gray-100 rounded-full"
+              className="p-2 hover:bg-muted rounded-full"
             >
-              <ChevronLeft className="h-5 w-5" />
+              <ChevronLeft className="h-5 w-5 text-foreground" />
             </button>
-            <h1 className="text-xl font-semibold capitalize">{activeSection}</h1>
+            <h1 className="text-xl font-semibold capitalize text-foreground">{activeSection}</h1>
           </div>
           {renderSectionContent()}
         </div>

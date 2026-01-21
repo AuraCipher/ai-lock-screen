@@ -1,8 +1,9 @@
-import React, { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { format } from 'date-fns';
 import { marked } from 'marked';
 import { Check, CheckCheck, MoreVertical, Trash2, Reply, Copy, Forward } from 'lucide-react';
 import DOMPurify from 'dompurify';
+import { toast } from 'react-hot-toast';
 
 interface MessageProps {
   content: string;
@@ -73,7 +74,7 @@ export default function Message({ content, timestamp, isOwn, status, attachments
 
   const renderContent = () => {
     // Convert markdown to HTML
-    const html = marked(content, { breaks: true });
+    const html = marked(content, { breaks: true, async: false }) as string;
     
     // Process hashtags and links
     const processedHtml = DOMPurify.sanitize(html)
@@ -106,16 +107,16 @@ export default function Message({ content, timestamp, isOwn, status, attachments
     >
       <div
         className={`relative max-w-[70%] rounded-lg px-4 py-2 ${
-          isOwn ? 'bg-indigo-600 text-white' : 'bg-white text-gray-900'
+          isOwn ? 'bg-primary text-primary-foreground' : 'bg-card text-foreground border border-border'
         }`}
       >
         <button
           onClick={() => setShowActions(!showActions)}
           className={`absolute -right-8 top-2 p-1 rounded-full ${
-            showActions ? 'bg-gray-200' : 'opacity-0 group-hover:opacity-100'
+            showActions ? 'bg-muted' : 'opacity-0 group-hover:opacity-100'
           }`}
         >
-          <MoreVertical className="h-4 w-4 text-gray-500" />
+          <MoreVertical className="h-4 w-4 text-muted-foreground" />
         </button>
 
         {/* Attachments */}
@@ -157,14 +158,14 @@ export default function Message({ content, timestamp, isOwn, status, attachments
           ref={actionsRef}
           className={`absolute ${
             isOwn ? 'right-full mr-2' : 'left-full ml-2'
-          } top-0 bg-white rounded-lg shadow-lg py-1 min-w-[140px] z-10`}
+          } top-0 bg-card rounded-lg shadow-lg py-1 min-w-[140px] z-10 border border-border`}
         >
           <button
             onClick={() => {
               handleCopyText();
               setShowActions(false);
             }}
-            className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+            className="flex items-center w-full px-4 py-2 text-sm text-foreground hover:bg-muted"
           >
             <Copy className="h-4 w-4 mr-2" />
             Copy
@@ -174,7 +175,7 @@ export default function Message({ content, timestamp, isOwn, status, attachments
               // Handle reply
               setShowActions(false);
             }}
-            className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+            className="flex items-center w-full px-4 py-2 text-sm text-foreground hover:bg-muted"
           >
             <Reply className="h-4 w-4 mr-2" />
             Reply
@@ -184,7 +185,7 @@ export default function Message({ content, timestamp, isOwn, status, attachments
               // Handle forward
               setShowActions(false);
             }}
-            className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+            className="flex items-center w-full px-4 py-2 text-sm text-foreground hover:bg-muted"
           >
             <Forward className="h-4 w-4 mr-2" />
             Forward
@@ -195,7 +196,7 @@ export default function Message({ content, timestamp, isOwn, status, attachments
                 onDelete?.();
                 setShowActions(false);
               }}
-              className="flex items-center w-full px-4 py-2 text-sm text-red-600 hover:bg-red-50"
+              className="flex items-center w-full px-4 py-2 text-sm text-destructive hover:bg-destructive/10"
             >
               <Trash2 className="h-4 w-4 mr-2" />
               Delete

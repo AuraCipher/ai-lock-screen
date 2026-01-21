@@ -34,7 +34,7 @@ class WebSocketManager {
     });
   }
 
-  public async connect(userId: string) {
+  public async connect(_userId: string) {
     const { data: { session } } = await supabase.auth.getSession();
     if (!session) return;
 
