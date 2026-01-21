@@ -610,18 +610,19 @@ export default function Auth() {
               </div>
               
               <p className="text-center mt-8 text-xs text-muted-foreground">
-                powered by <span className="font-semibold bg-gradient-to-r from-primary to-purple-600 bg-clip-text text-transparent">AureX</span>
+                Powered by <span className="font-semibold bg-gradient-to-r from-primary to-purple-600 bg-clip-text text-transparent">AureX</span>
               </p>
             </div>
           </motion.div>
           
           {/* Sign Up Form Panel */}
           <motion.div
-            className="w-1/2 p-8 lg:p-12 flex flex-col justify-center absolute inset-y-0 right-0 bg-card z-10"
+            className="w-1/2 p-8 lg:p-12 flex flex-col justify-center absolute inset-y-0 right-0 bg-background z-10"
+            initial={{ x: '0%', opacity: 0 }}
             animate={{
               x: isRightPanelActive ? '-100%' : '0%',
-              opacity: isRightPanelActive ? 1 : 0,
-              pointerEvents: isRightPanelActive ? 'auto' : 'none'
+              opacity: 1,
+              visibility: isRightPanelActive ? 'visible' : 'hidden'
             }}
             transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
           >
@@ -677,7 +678,7 @@ export default function Auth() {
               </div>
               
               <p className="text-center mt-6 text-xs text-muted-foreground">
-                powered by <span className="font-semibold bg-gradient-to-r from-primary to-purple-600 bg-clip-text text-transparent">AureX</span>
+                Powered by <span className="font-semibold bg-gradient-to-r from-primary to-purple-600 bg-clip-text text-transparent">AureX</span>
               </p>
             </div>
           </motion.div>
@@ -706,23 +707,7 @@ export default function Auth() {
                   exit={{ opacity: 0, y: -20 }}
                   transition={{ duration: 0.3 }}
                 >
-                  {mode === 'signin' ? (
-                    <>
-                      <div className="w-20 h-20 bg-white/20 backdrop-blur-sm rounded-3xl flex items-center justify-center mx-auto mb-6">
-                        <Sparkles className="h-10 w-10 text-white" />
-                      </div>
-                      <h2 className="text-4xl font-bold mb-4">New Here?</h2>
-                      <p className="text-white/80 mb-8 max-w-xs mx-auto leading-relaxed">
-                        Join our community and discover amazing connections waiting for you
-                      </p>
-                      <button
-                        onClick={handleModeToggle}
-                        className="px-8 py-3 border-2 border-white text-white rounded-xl font-semibold hover:bg-white hover:text-primary transition-all"
-                      >
-                        Create Account
-                      </button>
-                    </>
-                  ) : (
+                  {mode === 'signup' ? (
                     <>
                       <div className="w-20 h-20 bg-white/20 backdrop-blur-sm rounded-3xl flex items-center justify-center mx-auto mb-6">
                         <Zap className="h-10 w-10 text-white" />
@@ -736,6 +721,22 @@ export default function Auth() {
                         className="px-8 py-3 border-2 border-white text-white rounded-xl font-semibold hover:bg-white hover:text-primary transition-all"
                       >
                         Sign In
+                      </button>
+                    </>
+                  ) : (
+                    <>
+                      <div className="w-20 h-20 bg-white/20 backdrop-blur-sm rounded-3xl flex items-center justify-center mx-auto mb-6">
+                        <Sparkles className="h-10 w-10 text-white" />
+                      </div>
+                      <h2 className="text-4xl font-bold mb-4">New Here?</h2>
+                      <p className="text-white/80 mb-8 max-w-xs mx-auto leading-relaxed">
+                        Join our community and discover amazing connections waiting for you
+                      </p>
+                      <button
+                        onClick={handleModeToggle}
+                        className="px-8 py-3 border-2 border-white text-white rounded-xl font-semibold hover:bg-white hover:text-primary transition-all"
+                      >
+                        Create Account
                       </button>
                     </>
                   )}
