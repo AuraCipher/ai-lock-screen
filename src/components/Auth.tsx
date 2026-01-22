@@ -616,7 +616,7 @@ export default function Auth() {
           
           {/* Sign Up Form Panel */}
           <motion.div
-            className="w-1/2 p-8 lg:p-12 flex flex-col justify-center absolute inset-y-0 left-0 bg-card"
+            className="w-1/2 p-8 lg:p-12 flex flex-col justify-center absolute inset-y-0 right-0 bg-card"
             style={{ zIndex: isRightPanelActive ? 15 : 5 }}
             animate={{
               opacity: isRightPanelActive ? 1 : 0,
@@ -682,10 +682,11 @@ export default function Auth() {
           
           {/* Overlay Panel - Hidden on mobile */}
           <motion.div
-            className="hidden lg:flex w-1/2 absolute inset-y-0 right-0 bg-gradient-to-br from-primary via-purple-600 to-pink-500 z-20 items-center justify-center"
+            className="hidden lg:flex w-1/2 absolute inset-y-0 bg-gradient-to-br from-primary via-purple-600 to-pink-500 z-20 items-center justify-center"
+            initial={{ left: '50%' }}
             animate={{
-              x: isRightPanelActive ? '100%' : '0%',
-              borderRadius: isRightPanelActive ? '24px 0 0 24px' : '0 24px 24px 0'
+              left: isRightPanelActive ? '0%' : '50%',
+              borderRadius: isRightPanelActive ? '0 24px 24px 0' : '24px 0 0 24px'
             }}
             transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
           >

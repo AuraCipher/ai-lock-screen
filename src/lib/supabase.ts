@@ -1,25 +1,13 @@
+// Re-export from the auto-generated client
 import { createClient } from '@supabase/supabase-js';
 
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+const SUPABASE_URL = "https://wmvafvyawpngrcmqnsmd.supabase.co";
+const SUPABASE_PUBLISHABLE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndtdmFmdnlhd3BuZ3JjbXFuc21kIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg4MzE0NzgsImV4cCI6MjA4NDQwNzQ3OH0.mUhNKCxCse4sbRDPmj_ATOnrDGZTmwVXGI_cNgS5suo";
 
-if (!supabaseUrl || !supabaseAnonKey) {
-  throw new Error('Missing Supabase environment variables. Please click the "Connect to Supabase" button in the top right corner.');
-}
-
-export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+export const supabase = createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
   auth: {
     autoRefreshToken: true,
     persistSession: true,
     detectSessionInUrl: true
-  }
-});
-
-// Initialize Supabase auth listener
-supabase.auth.onAuthStateChange((event, session) => {
-  if (event === 'SIGNED_IN') {
-    console.log('User signed in:', session?.user?.id);
-  } else if (event === 'SIGNED_OUT') {
-    console.log('User signed out');
   }
 });
