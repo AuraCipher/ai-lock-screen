@@ -539,24 +539,23 @@ export default function Auth() {
           
           {/* Sign In Form Panel */}
           <motion.div
-            className="w-1/2 p-8 lg:p-12 flex flex-col justify-center absolute inset-y-0 left-0 bg-card z-10"
+            className="w-1/2 p-8 lg:p-12 flex flex-col justify-center absolute inset-y-0 left-0 bg-card"
+            style={{ zIndex: isRightPanelActive ? 5 : 15 }}
             animate={{
-              x: isRightPanelActive ? '100%' : '0%',
               opacity: isRightPanelActive ? 0 : 1,
-              pointerEvents: isRightPanelActive ? 'none' : 'auto'
             }}
-            transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+            transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
           >
             <div className="max-w-sm mx-auto w-full">
               <div className="text-center mb-8">
-                <div className="w-16 h-16 bg-gradient-to-br from-primary to-purple-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                  <Zap className="h-8 w-8 text-white" />
+                <div className="w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                  <Zap className="h-8 w-8 text-primary" />
                 </div>
                 <h1 className="text-3xl font-bold text-foreground">Welcome Back</h1>
                 <p className="text-muted-foreground mt-2">Sign in to continue your journey</p>
               </div>
               
-              <form onSubmit={handleSignIn} className="space-y-5">
+              <form onSubmit={handleSignIn} className="space-y-4">
                 <div className="relative">
                   <Mail className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
                   <input
@@ -617,14 +616,12 @@ export default function Auth() {
           
           {/* Sign Up Form Panel */}
           <motion.div
-            className="w-1/2 p-8 lg:p-12 flex flex-col justify-center absolute inset-y-0 right-0 bg-background z-10"
-            initial={{ x: '0%', opacity: 0 }}
+            className="w-1/2 p-8 lg:p-12 flex flex-col justify-center absolute inset-y-0 left-0 bg-card"
+            style={{ zIndex: isRightPanelActive ? 15 : 5 }}
             animate={{
-              x: isRightPanelActive ? '-100%' : '0%',
-              opacity: 1,
-              visibility: isRightPanelActive ? 'visible' : 'hidden'
+              opacity: isRightPanelActive ? 1 : 0,
             }}
-            transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+            transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
           >
             <div className="max-w-sm mx-auto w-full">
               {/* Progress indicator */}
@@ -685,10 +682,10 @@ export default function Auth() {
           
           {/* Overlay Panel - Hidden on mobile */}
           <motion.div
-            className="hidden lg:flex w-1/2 absolute inset-y-0 bg-gradient-to-br from-primary via-purple-600 to-pink-500 z-20 items-center justify-center"
+            className="hidden lg:flex w-1/2 absolute inset-y-0 right-0 bg-gradient-to-br from-primary via-purple-600 to-pink-500 z-20 items-center justify-center"
             animate={{
-              x: isRightPanelActive ? '0%' : '100%',
-              borderRadius: isRightPanelActive ? '0 24px 24px 0' : '24px 0 0 24px'
+              x: isRightPanelActive ? '100%' : '0%',
+              borderRadius: isRightPanelActive ? '24px 0 0 24px' : '0 24px 24px 0'
             }}
             transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
           >
