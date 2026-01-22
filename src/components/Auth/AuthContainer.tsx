@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { supabase } from '../lib/supabase';
+import { supabase } from '../../lib/supabase';
 import { toast } from 'react-hot-toast';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
@@ -19,21 +19,10 @@ import {
   Loader2,
   Zap
 } from 'lucide-react';
+import SocialLoginButtons from './SocialLoginButtons';
+import type { AuthMode, SignUpStep, SignUpData } from './types';
 
-type AuthMode = 'signin' | 'signup';
-type SignUpStep = 'email' | 'name' | 'username' | 'dob' | 'password' | 'confirmation';
-
-interface SignUpData {
-  email: string;
-  firstName: string;
-  lastName: string;
-  username: string;
-  dateOfBirth: string;
-  password: string;
-  confirmPassword: string;
-}
-
-export default function Auth() {
+export default function AuthContainer() {
   const [mode, setMode] = useState<AuthMode>('signin');
   const [isRightPanelActive, setIsRightPanelActive] = useState(false);
   const [currentStep, setCurrentStep] = useState<SignUpStep>('email');
@@ -344,6 +333,9 @@ export default function Auth() {
               {emailExists === true && !checkingEmail && <XCircle className="absolute right-4 top-1/2 -translate-y-1/2 h-5 w-5 text-destructive" />}
             </div>
             {emailExists && <p className="text-sm text-destructive">This email is already registered</p>}
+            
+            {/* Social login buttons */}
+            <SocialLoginButtons mode="signup" />
           </motion.div>
         );
       
@@ -534,7 +526,7 @@ export default function Auth() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-background to-muted/50 p-4">
-      <div className="w-full max-w-5xl h-[680px] bg-card rounded-3xl shadow-2xl overflow-hidden relative border border-border">
+      <div className="w-full max-w-5xl h-[720px] bg-card rounded-3xl shadow-2xl overflow-hidden relative border border-border">
         <div className="flex h-full relative">
           
           {/* Sign In Form Panel */}
@@ -600,6 +592,11 @@ export default function Auth() {
                 </button>
               </form>
               
+              {/* Social login buttons */}
+              <div className="mt-6">
+                <SocialLoginButtons mode="signin" />
+              </div>
+              
               {/* Mobile toggle */}
               <div className="lg:hidden mt-6 text-center">
                 <p className="text-muted-foreground text-sm">Don't have an account?</p>
@@ -608,7 +605,7 @@ export default function Auth() {
                 </button>
               </div>
               
-              <p className="text-center mt-8 text-xs text-muted-foreground">
+              <p className="text-center mt-6 text-xs text-muted-foreground">
                 Powered by <span className="font-semibold bg-gradient-to-r from-primary to-purple-600 bg-clip-text text-transparent">AureX</span>
               </p>
             </div>
@@ -674,7 +671,7 @@ export default function Auth() {
                 </button>
               </div>
               
-              <p className="text-center mt-6 text-xs text-muted-foreground">
+              <p className="text-center mt-4 text-xs text-muted-foreground">
                 Powered by <span className="font-semibold bg-gradient-to-r from-primary to-purple-600 bg-clip-text text-transparent">AureX</span>
               </p>
             </div>
