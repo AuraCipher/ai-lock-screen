@@ -197,7 +197,6 @@ export default function AuthContainer() {
           toast.error('Please enter your date of birth');
           return;
         }
-        // Age validation (16+)
         const birth = new Date(signUpData.dateOfBirth);
         const today = new Date();
         let age = today.getFullYear() - birth.getFullYear();
@@ -300,74 +299,72 @@ export default function AuthContainer() {
   maxDate.setFullYear(maxDate.getFullYear() - 16);
   const maxDateString = maxDate.toISOString().split('T')[0];
 
-  const renderSignUpStep = () => {
-    const stepVariants = {
-      initial: { opacity: 0, x: 20 },
-      animate: { opacity: 1, x: 0 },
-      exit: { opacity: 0, x: -20 }
-    };
+  const stepVariants = {
+    initial: { opacity: 0, x: 20 },
+    animate: { opacity: 1, x: 0 },
+    exit: { opacity: 0, x: -20 }
+  };
 
+  const renderSignUpStep = () => {
     switch (currentStep) {
       case 'email':
         return (
-          <motion.div key="email" variants={stepVariants} initial="initial" animate="animate" exit="exit" className="space-y-6">
-            <div className="text-center mb-6">
-              <div className="w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                <Mail className="h-8 w-8 text-primary" />
+          <motion.div key="email" variants={stepVariants} initial="initial" animate="animate" exit="exit" className="space-y-4 sm:space-y-6">
+            <div className="text-center mb-4 sm:mb-6">
+              <div className="w-12 h-12 sm:w-16 sm:h-16 bg-primary/10 rounded-2xl flex items-center justify-center mx-auto mb-3 sm:mb-4">
+                <Mail className="h-6 w-6 sm:h-8 sm:w-8 text-primary" />
               </div>
-              <h2 className="text-2xl font-bold text-foreground">Let's get started</h2>
-              <p className="text-muted-foreground mt-2">Enter your email to create an account</p>
+              <h2 className="text-xl sm:text-2xl font-bold text-foreground">Let's get started</h2>
+              <p className="text-muted-foreground mt-1 sm:mt-2 text-sm sm:text-base">Enter your email to create an account</p>
             </div>
             <div className="relative">
-              <Mail className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+              <Mail className="absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground" />
               <input
                 type="email"
                 value={signUpData.email}
                 onChange={(e) => setSignUpData({ ...signUpData, email: e.target.value })}
                 onBlur={() => checkEmailExists(signUpData.email)}
                 placeholder="your@email.com"
-                className="w-full pl-12 pr-12 py-4 bg-background border border-input rounded-xl text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary transition-all"
+                className="w-full pl-10 sm:pl-12 pr-10 sm:pr-12 py-3 sm:py-4 bg-background border border-input rounded-xl text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary transition-all text-sm sm:text-base"
               />
-              {checkingEmail && <Loader2 className="absolute right-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground animate-spin" />}
-              {emailExists === false && !checkingEmail && signUpData.email && <CheckCircle2 className="absolute right-4 top-1/2 -translate-y-1/2 h-5 w-5 text-green-500" />}
-              {emailExists === true && !checkingEmail && <XCircle className="absolute right-4 top-1/2 -translate-y-1/2 h-5 w-5 text-destructive" />}
+              {checkingEmail && <Loader2 className="absolute right-3 sm:right-4 top-1/2 -translate-y-1/2 h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground animate-spin" />}
+              {emailExists === false && !checkingEmail && signUpData.email && <CheckCircle2 className="absolute right-3 sm:right-4 top-1/2 -translate-y-1/2 h-4 w-4 sm:h-5 sm:w-5 text-green-500" />}
+              {emailExists === true && !checkingEmail && <XCircle className="absolute right-3 sm:right-4 top-1/2 -translate-y-1/2 h-4 w-4 sm:h-5 sm:w-5 text-destructive" />}
             </div>
-            {emailExists && <p className="text-sm text-destructive">This email is already registered</p>}
-            
-            {/* Social login buttons */}
+            {emailExists && <p className="text-xs sm:text-sm text-destructive">This email is already registered</p>}
             <SocialLoginButtons mode="signup" />
           </motion.div>
         );
       
       case 'name':
         return (
-          <motion.div key="name" variants={stepVariants} initial="initial" animate="animate" exit="exit" className="space-y-6">
-            <div className="text-center mb-6">
-              <div className="w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                <User className="h-8 w-8 text-primary" />
+          <motion.div key="name" variants={stepVariants} initial="initial" animate="animate" exit="exit" className="space-y-4 sm:space-y-6">
+            <div className="text-center mb-4 sm:mb-6">
+              <div className="w-12 h-12 sm:w-16 sm:h-16 bg-primary/10 rounded-2xl flex items-center justify-center mx-auto mb-3 sm:mb-4">
+                <User className="h-6 w-6 sm:h-8 sm:w-8 text-primary" />
               </div>
-              <h2 className="text-2xl font-bold text-foreground">What's your name?</h2>
-              <p className="text-muted-foreground mt-2">Let us know how to address you</p>
+              <h2 className="text-xl sm:text-2xl font-bold text-foreground">What's your name?</h2>
+              <p className="text-muted-foreground mt-1 sm:mt-2 text-sm sm:text-base">Let us know how to address you</p>
             </div>
-            <div className="space-y-4">
+            <div className="space-y-3 sm:space-y-4">
               <div className="relative">
-                <User className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                <User className="absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground" />
                 <input
                   type="text"
                   value={signUpData.firstName}
                   onChange={(e) => setSignUpData({ ...signUpData, firstName: e.target.value })}
                   placeholder="First name"
-                  className="w-full pl-12 pr-4 py-4 bg-background border border-input rounded-xl text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary transition-all"
+                  className="w-full pl-10 sm:pl-12 pr-4 py-3 sm:py-4 bg-background border border-input rounded-xl text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary transition-all text-sm sm:text-base"
                 />
               </div>
               <div className="relative">
-                <User className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                <User className="absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground" />
                 <input
                   type="text"
                   value={signUpData.lastName}
                   onChange={(e) => setSignUpData({ ...signUpData, lastName: e.target.value })}
                   placeholder="Last name (optional)"
-                  className="w-full pl-12 pr-4 py-4 bg-background border border-input rounded-xl text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary transition-all"
+                  className="w-full pl-10 sm:pl-12 pr-4 py-3 sm:py-4 bg-background border border-input rounded-xl text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary transition-all text-sm sm:text-base"
                 />
               </div>
             </div>
@@ -376,41 +373,41 @@ export default function AuthContainer() {
       
       case 'username':
         return (
-          <motion.div key="username" variants={stepVariants} initial="initial" animate="animate" exit="exit" className="space-y-6">
-            <div className="text-center mb-6">
-              <div className="w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                <AtSign className="h-8 w-8 text-primary" />
+          <motion.div key="username" variants={stepVariants} initial="initial" animate="animate" exit="exit" className="space-y-4 sm:space-y-6">
+            <div className="text-center mb-4 sm:mb-6">
+              <div className="w-12 h-12 sm:w-16 sm:h-16 bg-primary/10 rounded-2xl flex items-center justify-center mx-auto mb-3 sm:mb-4">
+                <AtSign className="h-6 w-6 sm:h-8 sm:w-8 text-primary" />
               </div>
-              <h2 className="text-2xl font-bold text-foreground">Choose your username</h2>
-              <p className="text-muted-foreground mt-2">This is how others will find you</p>
+              <h2 className="text-xl sm:text-2xl font-bold text-foreground">Choose your username</h2>
+              <p className="text-muted-foreground mt-1 sm:mt-2 text-sm sm:text-base">This is how others will find you</p>
             </div>
             <div className="relative">
-              <AtSign className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+              <AtSign className="absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground" />
               <input
                 type="text"
                 value={signUpData.username}
                 onChange={(e) => setSignUpData({ ...signUpData, username: e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, '') })}
                 placeholder="username"
-                className="w-full pl-12 pr-12 py-4 bg-background border border-input rounded-xl text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary transition-all"
+                className="w-full pl-10 sm:pl-12 pr-10 sm:pr-12 py-3 sm:py-4 bg-background border border-input rounded-xl text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary transition-all text-sm sm:text-base"
               />
-              {checkingUsername && <Loader2 className="absolute right-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground animate-spin" />}
-              {usernameAvailable === true && !checkingUsername && signUpData.username.length >= 3 && <CheckCircle2 className="absolute right-4 top-1/2 -translate-y-1/2 h-5 w-5 text-green-500" />}
-              {usernameAvailable === false && !checkingUsername && <XCircle className="absolute right-4 top-1/2 -translate-y-1/2 h-5 w-5 text-destructive" />}
+              {checkingUsername && <Loader2 className="absolute right-3 sm:right-4 top-1/2 -translate-y-1/2 h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground animate-spin" />}
+              {usernameAvailable === true && !checkingUsername && signUpData.username.length >= 3 && <CheckCircle2 className="absolute right-3 sm:right-4 top-1/2 -translate-y-1/2 h-4 w-4 sm:h-5 sm:w-5 text-green-500" />}
+              {usernameAvailable === false && !checkingUsername && <XCircle className="absolute right-3 sm:right-4 top-1/2 -translate-y-1/2 h-4 w-4 sm:h-5 sm:w-5 text-destructive" />}
             </div>
             {usernameAvailable === true && signUpData.username.length >= 3 && (
-              <p className="text-sm text-green-500 flex items-center gap-1">
-                <CheckCircle2 className="h-4 w-4" /> @{signUpData.username} is available!
+              <p className="text-xs sm:text-sm text-green-500 flex items-center gap-1">
+                <CheckCircle2 className="h-3 w-3 sm:h-4 sm:w-4" /> @{signUpData.username} is available!
               </p>
             )}
             {usernameAvailable === false && usernameSuggestions.length > 0 && (
               <div className="space-y-2">
-                <p className="text-sm text-destructive">Username taken. Try these:</p>
+                <p className="text-xs sm:text-sm text-destructive">Username taken. Try these:</p>
                 <div className="flex flex-wrap gap-2">
                   {usernameSuggestions.map((suggestion) => (
                     <button
                       key={suggestion}
                       onClick={() => setSignUpData({ ...signUpData, username: suggestion })}
-                      className="px-3 py-1.5 bg-muted text-foreground rounded-full text-sm hover:bg-primary hover:text-primary-foreground transition-colors"
+                      className="px-2 sm:px-3 py-1 sm:py-1.5 bg-muted text-foreground rounded-full text-xs sm:text-sm hover:bg-primary hover:text-primary-foreground transition-colors"
                     >
                       @{suggestion}
                     </button>
@@ -423,68 +420,80 @@ export default function AuthContainer() {
       
       case 'dob':
         return (
-          <motion.div key="dob" variants={stepVariants} initial="initial" animate="animate" exit="exit" className="space-y-6">
-            <div className="text-center mb-6">
-              <div className="w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                <Calendar className="h-8 w-8 text-primary" />
+          <motion.div key="dob" variants={stepVariants} initial="initial" animate="animate" exit="exit" className="space-y-4 sm:space-y-6">
+            <div className="text-center mb-4 sm:mb-6">
+              <div className="w-12 h-12 sm:w-16 sm:h-16 bg-primary/10 rounded-2xl flex items-center justify-center mx-auto mb-3 sm:mb-4">
+                <Calendar className="h-6 w-6 sm:h-8 sm:w-8 text-primary" />
               </div>
-              <h2 className="text-2xl font-bold text-foreground">When's your birthday?</h2>
-              <p className="text-muted-foreground mt-2">We'll never share this with anyone</p>
+              <h2 className="text-xl sm:text-2xl font-bold text-foreground">When's your birthday?</h2>
+              <p className="text-muted-foreground mt-1 sm:mt-2 text-sm sm:text-base">We'll never share this with anyone</p>
             </div>
             <div className="relative">
-              <Calendar className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+              <Calendar className="absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground" />
               <input
                 type="date"
                 value={signUpData.dateOfBirth}
                 onChange={(e) => setSignUpData({ ...signUpData, dateOfBirth: e.target.value })}
                 max={maxDateString}
-                className="w-full pl-12 pr-4 py-4 bg-background border border-input rounded-xl text-foreground focus:outline-none focus:ring-2 focus:ring-primary transition-all"
+                className="w-full pl-10 sm:pl-12 pr-4 py-3 sm:py-4 bg-background border border-input rounded-xl text-foreground focus:outline-none focus:ring-2 focus:ring-primary transition-all text-sm sm:text-base"
               />
             </div>
-            <p className="text-xs text-muted-foreground text-center">You must be at least 16 years old</p>
+            <p className="text-[10px] sm:text-xs text-muted-foreground text-center">You must be at least 16 years old</p>
           </motion.div>
         );
       
       case 'password':
         return (
-          <motion.div key="password" variants={stepVariants} initial="initial" animate="animate" exit="exit" className="space-y-6">
-            <div className="text-center mb-6">
-              <div className="w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                <Lock className="h-8 w-8 text-primary" />
+          <motion.div key="password" variants={stepVariants} initial="initial" animate="animate" exit="exit" className="space-y-4 sm:space-y-6">
+            <div className="text-center mb-4 sm:mb-6">
+              <div className="w-12 h-12 sm:w-16 sm:h-16 bg-primary/10 rounded-2xl flex items-center justify-center mx-auto mb-3 sm:mb-4">
+                <Lock className="h-6 w-6 sm:h-8 sm:w-8 text-primary" />
               </div>
-              <h2 className="text-2xl font-bold text-foreground">Create a password</h2>
-              <p className="text-muted-foreground mt-2">Make it strong and memorable</p>
+              <h2 className="text-xl sm:text-2xl font-bold text-foreground">Create a password</h2>
+              <p className="text-muted-foreground mt-1 sm:mt-2 text-sm sm:text-base">Make it strong and memorable</p>
             </div>
-            <div className="space-y-4">
+            <div className="space-y-3 sm:space-y-4">
               <div className="relative">
-                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                <Lock className="absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground" />
                 <input
                   type={showPassword ? 'text' : 'password'}
                   value={signUpData.password}
                   onChange={(e) => setSignUpData({ ...signUpData, password: e.target.value })}
-                  placeholder="Password (min 6 characters)"
-                  className="w-full pl-12 pr-12 py-4 bg-background border border-input rounded-xl text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary transition-all"
+                  placeholder="Password"
+                  className="w-full pl-10 sm:pl-12 pr-10 sm:pr-12 py-3 sm:py-4 bg-background border border-input rounded-xl text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary transition-all text-sm sm:text-base"
                 />
-                <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
-                  {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 sm:right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                >
+                  {showPassword ? <EyeOff className="h-4 w-4 sm:h-5 sm:w-5" /> : <Eye className="h-4 w-4 sm:h-5 sm:w-5" />}
                 </button>
               </div>
               <div className="relative">
-                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                <Lock className="absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground" />
                 <input
                   type={showConfirmPassword ? 'text' : 'password'}
                   value={signUpData.confirmPassword}
                   onChange={(e) => setSignUpData({ ...signUpData, confirmPassword: e.target.value })}
                   placeholder="Confirm password"
-                  className="w-full pl-12 pr-12 py-4 bg-background border border-input rounded-xl text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary transition-all"
+                  className="w-full pl-10 sm:pl-12 pr-10 sm:pr-12 py-3 sm:py-4 bg-background border border-input rounded-xl text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary transition-all text-sm sm:text-base"
                 />
-                <button type="button" onClick={() => setShowConfirmPassword(!showConfirmPassword)} className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
-                  {showConfirmPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                <button
+                  type="button"
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  className="absolute right-3 sm:right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                >
+                  {showConfirmPassword ? <EyeOff className="h-4 w-4 sm:h-5 sm:w-5" /> : <Eye className="h-4 w-4 sm:h-5 sm:w-5" />}
                 </button>
               </div>
               {signUpData.password && signUpData.confirmPassword && (
-                <p className={`text-sm flex items-center gap-1 ${signUpData.password === signUpData.confirmPassword ? 'text-green-500' : 'text-destructive'}`}>
-                  {signUpData.password === signUpData.confirmPassword ? <><CheckCircle2 className="h-4 w-4" /> Passwords match</> : <><XCircle className="h-4 w-4" /> Passwords do not match</>}
+                <p className={`text-xs sm:text-sm flex items-center gap-1 ${signUpData.password === signUpData.confirmPassword ? 'text-green-500' : 'text-destructive'}`}>
+                  {signUpData.password === signUpData.confirmPassword ? (
+                    <><CheckCircle2 className="h-3 w-3 sm:h-4 sm:w-4" /> Passwords match</>
+                  ) : (
+                    <><XCircle className="h-3 w-3 sm:h-4 sm:w-4" /> Passwords don't match</>
+                  )}
                 </p>
               )}
             </div>
@@ -493,45 +502,210 @@ export default function AuthContainer() {
       
       case 'confirmation':
         return (
-          <motion.div key="confirmation" variants={stepVariants} initial="initial" animate="animate" exit="exit" className="space-y-6">
-            <div className="text-center mb-6">
-              <div className="w-16 h-16 bg-gradient-to-br from-primary to-purple-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                <Sparkles className="h-8 w-8 text-white" />
+          <motion.div key="confirmation" variants={stepVariants} initial="initial" animate="animate" exit="exit" className="space-y-4 sm:space-y-6">
+            <div className="text-center mb-4 sm:mb-6">
+              <div className="w-12 h-12 sm:w-16 sm:h-16 bg-green-500/10 rounded-2xl flex items-center justify-center mx-auto mb-3 sm:mb-4">
+                <Check className="h-6 w-6 sm:h-8 sm:w-8 text-green-500" />
               </div>
-              <h2 className="text-2xl font-bold text-foreground">Almost there!</h2>
-              <p className="text-muted-foreground mt-2">Review your details and create your account</p>
+              <h2 className="text-xl sm:text-2xl font-bold text-foreground">Almost there!</h2>
+              <p className="text-muted-foreground mt-1 sm:mt-2 text-sm sm:text-base">Review your details</p>
             </div>
-            <div className="bg-muted/50 rounded-2xl p-5 space-y-3">
-              <div className="flex justify-between items-center py-2 border-b border-border">
-                <span className="text-muted-foreground text-sm">Email</span>
-                <span className="text-foreground font-medium text-sm">{signUpData.email}</span>
+            <div className="bg-muted/50 rounded-xl p-3 sm:p-4 space-y-2 sm:space-y-3">
+              <div className="flex justify-between items-center text-xs sm:text-sm">
+                <span className="text-muted-foreground">Email</span>
+                <span className="text-foreground font-medium truncate max-w-[60%]">{signUpData.email}</span>
               </div>
-              <div className="flex justify-between items-center py-2 border-b border-border">
-                <span className="text-muted-foreground text-sm">Name</span>
-                <span className="text-foreground font-medium text-sm">{signUpData.firstName} {signUpData.lastName}</span>
+              <div className="flex justify-between items-center text-xs sm:text-sm">
+                <span className="text-muted-foreground">Name</span>
+                <span className="text-foreground font-medium">{signUpData.firstName} {signUpData.lastName}</span>
               </div>
-              <div className="flex justify-between items-center py-2 border-b border-border">
-                <span className="text-muted-foreground text-sm">Username</span>
-                <span className="text-foreground font-medium text-sm">@{signUpData.username}</span>
+              <div className="flex justify-between items-center text-xs sm:text-sm">
+                <span className="text-muted-foreground">Username</span>
+                <span className="text-foreground font-medium">@{signUpData.username}</span>
               </div>
-              <div className="flex justify-between items-center py-2">
-                <span className="text-muted-foreground text-sm">Birthday</span>
-                <span className="text-foreground font-medium text-sm">{new Date(signUpData.dateOfBirth).toLocaleDateString()}</span>
+              <div className="flex justify-between items-center text-xs sm:text-sm">
+                <span className="text-muted-foreground">Birthday</span>
+                <span className="text-foreground font-medium">{new Date(signUpData.dateOfBirth).toLocaleDateString()}</span>
               </div>
             </div>
+            <p className="text-[10px] sm:text-xs text-muted-foreground text-center">
+              By creating an account, you agree to our Terms of Service and Privacy Policy
+            </p>
           </motion.div>
         );
+      
+      default:
+        return null;
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-background to-muted/50 p-4">
-      <div className="w-full max-w-5xl h-[720px] bg-card rounded-3xl shadow-2xl overflow-hidden relative border border-border">
-        <div className="flex h-full relative">
+    <div className="fixed inset-0 w-full h-full overflow-hidden bg-gradient-to-br from-muted via-background to-muted">
+      {/* Background decorations */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute -top-40 -right-40 w-80 h-80 bg-primary/5 rounded-full blur-3xl" />
+        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-purple-500/5 rounded-full blur-3xl" />
+      </div>
+      
+      {/* Main container */}
+      <div className="relative w-full h-full flex items-center justify-center p-4">
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.5 }}
+          className="w-full max-w-4xl h-full max-h-[600px] bg-card rounded-2xl sm:rounded-3xl shadow-2xl overflow-hidden relative flex"
+        >
+          {/* Mobile: Single panel view */}
+          <div className="flex-1 lg:hidden flex flex-col h-full overflow-y-auto">
+            {/* Mobile header with gradient */}
+            <div className="bg-gradient-to-br from-primary via-purple-600 to-pink-500 px-6 py-6 sm:py-8 text-center text-white flex-shrink-0">
+              <motion.div
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+              >
+                <div className="w-12 h-12 sm:w-14 sm:h-14 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center mx-auto mb-3">
+                  {mode === 'signin' ? (
+                    <Zap className="h-6 w-6 sm:h-7 sm:w-7 text-white" />
+                  ) : (
+                    <Sparkles className="h-6 w-6 sm:h-7 sm:w-7 text-white" />
+                  )}
+                </div>
+                <h1 className="text-xl sm:text-2xl font-bold">
+                  {mode === 'signin' ? 'Welcome Back!' : 'Join AureX'}
+                </h1>
+                <p className="text-white/80 text-xs sm:text-sm mt-1">
+                  {mode === 'signin' ? 'Sign in to continue' : 'Create your account'}
+                </p>
+              </motion.div>
+            </div>
+            
+            {/* Mobile form content */}
+            <div className="flex-1 p-4 sm:p-6 overflow-y-auto">
+              <AnimatePresence mode="wait">
+                {mode === 'signin' ? (
+                  <motion.div
+                    key="signin-mobile"
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: 20 }}
+                  >
+                    <form onSubmit={handleSignIn} className="space-y-3 sm:space-y-4">
+                      <div className="relative">
+                        <Mail className="absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground" />
+                        <input
+                          type="email"
+                          value={signInEmail}
+                          onChange={(e) => setSignInEmail(e.target.value)}
+                          placeholder="Email address"
+                          className="w-full pl-10 sm:pl-12 pr-4 py-3 sm:py-4 bg-background border border-input rounded-xl text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary transition-all text-sm sm:text-base"
+                        />
+                      </div>
+                      
+                      <div className="relative">
+                        <Lock className="absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground" />
+                        <input
+                          type={showPassword ? 'text' : 'password'}
+                          value={signInPassword}
+                          onChange={(e) => setSignInPassword(e.target.value)}
+                          placeholder="Password"
+                          className="w-full pl-10 sm:pl-12 pr-10 sm:pr-12 py-3 sm:py-4 bg-background border border-input rounded-xl text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary transition-all text-sm sm:text-base"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowPassword(!showPassword)}
+                          className="absolute right-3 sm:right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                        >
+                          {showPassword ? <EyeOff className="h-4 w-4 sm:h-5 sm:w-5" /> : <Eye className="h-4 w-4 sm:h-5 sm:w-5" />}
+                        </button>
+                      </div>
+                      
+                      <div className="text-right">
+                        <button type="button" onClick={handleForgotPassword} className="text-xs sm:text-sm text-primary hover:underline">
+                          Forgot password?
+                        </button>
+                      </div>
+                      
+                      <button
+                        type="submit"
+                        disabled={isLoading}
+                        className="w-full py-3 sm:py-4 bg-primary text-primary-foreground rounded-xl font-semibold hover:bg-primary/90 transition-all disabled:opacity-50 flex items-center justify-center gap-2 shadow-lg shadow-primary/25 text-sm sm:text-base"
+                      >
+                        {isLoading ? <Loader2 className="h-4 w-4 sm:h-5 sm:w-5 animate-spin" /> : <><span>Sign In</span><ArrowRight className="h-4 w-4 sm:h-5 sm:w-5" /></>}
+                      </button>
+                    </form>
+                    
+                    <div className="mt-4 sm:mt-6">
+                      <SocialLoginButtons mode="signin" />
+                    </div>
+                  </motion.div>
+                ) : (
+                  <motion.div
+                    key="signup-mobile"
+                    initial={{ opacity: 0, x: 20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: -20 }}
+                  >
+                    {/* Progress indicator */}
+                    <div className="flex items-center justify-center gap-1.5 sm:gap-2 mb-4 sm:mb-6">
+                      {steps.map((step, index) => (
+                        <motion.div
+                          key={step}
+                          className={`h-1.5 sm:h-2 rounded-full transition-all duration-300 ${
+                            index <= currentStepIndex ? 'bg-primary' : 'bg-muted'
+                          }`}
+                          animate={{ width: index <= currentStepIndex ? 20 : 8 }}
+                        />
+                      ))}
+                    </div>
+                    
+                    <AnimatePresence mode="wait">
+                      {renderSignUpStep()}
+                    </AnimatePresence>
+                    
+                    <div className="flex gap-2 sm:gap-3 mt-4 sm:mt-6">
+                      {currentStepIndex > 0 && (
+                        <button
+                          onClick={handlePrevStep}
+                          className="flex-1 py-3 sm:py-4 bg-muted text-foreground rounded-xl font-semibold hover:bg-muted/80 transition-all flex items-center justify-center gap-1 sm:gap-2 text-sm sm:text-base"
+                        >
+                          <ArrowLeft className="h-4 w-4 sm:h-5 sm:w-5" />
+                          <span>Back</span>
+                        </button>
+                      )}
+                      <button
+                        onClick={handleNextStep}
+                        disabled={isLoading}
+                        className={`${currentStepIndex > 0 ? 'flex-1' : 'w-full'} py-3 sm:py-4 bg-primary text-primary-foreground rounded-xl font-semibold hover:bg-primary/90 transition-all disabled:opacity-50 flex items-center justify-center gap-1 sm:gap-2 shadow-lg shadow-primary/25 text-sm sm:text-base`}
+                      >
+                        {isLoading ? (
+                          <Loader2 className="h-4 w-4 sm:h-5 sm:w-5 animate-spin" />
+                        ) : currentStep === 'confirmation' ? (
+                          <><span>Create Account</span><Check className="h-4 w-4 sm:h-5 sm:w-5" /></>
+                        ) : (
+                          <><span>Continue</span><ArrowRight className="h-4 w-4 sm:h-5 sm:w-5" /></>
+                        )}
+                      </button>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+              
+              {/* Mobile toggle */}
+              <div className="mt-4 sm:mt-6 text-center pb-4">
+                <p className="text-muted-foreground text-xs sm:text-sm">
+                  {mode === 'signin' ? "Don't have an account?" : 'Already have an account?'}
+                </p>
+                <button onClick={handleModeToggle} className="text-primary font-semibold hover:underline mt-1 text-sm sm:text-base">
+                  {mode === 'signin' ? 'Create Account' : 'Sign In'}
+                </button>
+              </div>
+            </div>
+          </div>
           
+          {/* Desktop: Split panel view */}
           {/* Sign In Form Panel */}
           <motion.div
-            className="w-1/2 p-8 lg:p-12 flex flex-col justify-center absolute inset-y-0 left-0 bg-card"
+            className="hidden lg:flex w-1/2 p-8 lg:p-12 flex-col justify-center absolute inset-y-0 left-0 bg-card"
             style={{ zIndex: isRightPanelActive ? 5 : 15 }}
             animate={{
               opacity: isRightPanelActive ? 0 : 1,
@@ -543,8 +717,8 @@ export default function AuthContainer() {
                 <div className="w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center mx-auto mb-4">
                   <Zap className="h-8 w-8 text-primary" />
                 </div>
-                <h1 className="text-3xl font-bold text-foreground">Welcome Back</h1>
-                <p className="text-muted-foreground mt-2">Sign in to continue your journey</p>
+                <h2 className="text-3xl font-bold text-foreground">Welcome Back</h2>
+                <p className="text-muted-foreground mt-2">Sign in to your account</p>
               </div>
               
               <form onSubmit={handleSignIn} className="space-y-4">
@@ -592,17 +766,8 @@ export default function AuthContainer() {
                 </button>
               </form>
               
-              {/* Social login buttons */}
               <div className="mt-6">
                 <SocialLoginButtons mode="signin" />
-              </div>
-              
-              {/* Mobile toggle */}
-              <div className="lg:hidden mt-6 text-center">
-                <p className="text-muted-foreground text-sm">Don't have an account?</p>
-                <button onClick={handleModeToggle} className="text-primary font-semibold hover:underline mt-1">
-                  Create Account
-                </button>
               </div>
               
               <p className="text-center mt-6 text-xs text-muted-foreground">
@@ -613,7 +778,7 @@ export default function AuthContainer() {
           
           {/* Sign Up Form Panel */}
           <motion.div
-            className="w-1/2 p-8 lg:p-12 flex flex-col justify-center absolute inset-y-0 right-0 bg-card"
+            className="hidden lg:flex w-1/2 p-8 lg:p-12 flex-col justify-center absolute inset-y-0 right-0 bg-card"
             style={{ zIndex: isRightPanelActive ? 15 : 5 }}
             animate={{
               opacity: isRightPanelActive ? 1 : 0,
@@ -663,21 +828,13 @@ export default function AuthContainer() {
                 </button>
               </div>
               
-              {/* Mobile toggle */}
-              <div className="lg:hidden mt-6 text-center">
-                <p className="text-muted-foreground text-sm">Already have an account?</p>
-                <button onClick={handleModeToggle} className="text-primary font-semibold hover:underline mt-1">
-                  Sign In
-                </button>
-              </div>
-              
               <p className="text-center mt-4 text-xs text-muted-foreground">
                 Powered by <span className="font-semibold bg-gradient-to-r from-primary to-purple-600 bg-clip-text text-transparent">AureX</span>
               </p>
             </div>
           </motion.div>
           
-          {/* Overlay Panel - Hidden on mobile */}
+          {/* Overlay Panel - Desktop only */}
           <motion.div
             className="hidden lg:flex w-1/2 absolute inset-y-0 bg-gradient-to-br from-primary via-purple-600 to-pink-500 z-20 items-center justify-center"
             initial={{ left: '50%' }}
@@ -739,7 +896,7 @@ export default function AuthContainer() {
               </AnimatePresence>
             </div>
           </motion.div>
-        </div>
+        </motion.div>
       </div>
     </div>
   );
