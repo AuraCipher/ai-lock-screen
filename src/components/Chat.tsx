@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, FormEvent } from 'react';
-import { Send, Search, Phone, Video, Info, ArrowLeft, Lock, Unlock, Settings } from 'lucide-react';
+import { Send, Search, Phone, Video, Info, ArrowLeft, Lock, Unlock, Settings, MessageCircle, Users } from 'lucide-react';
 import { Session } from '@supabase/supabase-js';
+import { motion, AnimatePresence } from 'framer-motion';
 import { supabase } from '../lib/supabase';
 import { toast } from 'react-hot-toast';
 
@@ -254,187 +255,250 @@ export default function Chat({ session }: ChatProps) {
   const selectedUserData = users.find(u => u.id === selectedUser);
 
   return (
-    <div className="h-[calc(100vh-12rem)] bg-card rounded-lg shadow-lg overflow-hidden border border-border">
-      {!selectedUser ? (
-        <div className="flex flex-col h-full">
-          <div className="p-4 border-b border-border">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xl font-semibold text-foreground">Messages</h2>
-              <div className="flex items-center space-x-2">
-                <button
-                  onClick={() => setShowLockedChats(!showLockedChats)}
-                  className={`p-2 rounded-full transition-colors ${
-                    showLockedChats ? 'bg-primary/10 text-primary' : 'hover:bg-muted'
-                  }`}
-                >
-                  {showLockedChats ? (
-                    <Lock className="h-5 w-5" />
-                  ) : (
-                    <Unlock className="h-5 w-5" />
-                  )}
-                </button>
-                <button
-                  className="p-2 hover:bg-muted rounded-full transition-colors"
-                >
-                  <Settings className="h-5 w-5 text-muted-foreground" />
-                </button>
-              </div>
-            </div>
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-5 w-5" />
-              <input
-                type="text"
-                placeholder="Search messages"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 bg-muted border border-border rounded-full focus:outline-none focus:ring-2 focus:ring-ring text-foreground placeholder:text-muted-foreground"
-              />
-            </div>
-          </div>
-
-          <div className="overflow-y-auto flex-1">
-            {filteredUsers.map((user) => (
-              <div
-                key={user.id}
-                className="p-4 flex items-center justify-between hover:bg-muted transition-colors border-b border-border cursor-pointer"
-              >
-                <button
-                  onClick={() => setSelectedUser(user.id)}
-                  className="flex items-center space-x-3 flex-1"
-                >
-                  <div className="relative">
-                    <img
-                      src={user.avatar_url || `https://api.dicebear.com/7.x/initials/svg?seed=${user.id}`}
-                      alt=""
-                      className="w-14 h-14 rounded-full object-cover"
-                    />
-                    <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 border-card"></div>
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      className="h-[calc(100vh-10rem)] sm:h-[calc(100vh-12rem)] bg-card rounded-2xl shadow-xl overflow-hidden border border-border"
+    >
+      <AnimatePresence mode="wait">
+        {!selectedUser ? (
+          <motion.div
+            key="user-list"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0, x: -20 }}
+            className="flex flex-col h-full"
+          >
+            {/* Header */}
+            <div className="p-4 sm:p-5 border-b border-border bg-card/50 backdrop-blur-sm">
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-primary/10 rounded-xl flex items-center justify-center">
+                    <MessageCircle className="h-5 w-5 text-primary" />
                   </div>
-                  <div className="flex-1 min-w-0">
-                    <h3 className="font-medium text-foreground text-left">
-                      {user.custom_chat_name || user.username}
-                    </h3>
-                    <p className="text-sm text-muted-foreground truncate text-left">
-                      Tap to start chatting
-                    </p>
+                  <div>
+                    <h2 className="text-lg sm:text-xl font-bold text-foreground">Messages</h2>
+                    <p className="text-xs text-muted-foreground">{users.length} conversations</p>
                   </div>
-                </button>
-                <button
-                  onClick={() => toggleChatLock(user.id)}
-                  className={`p-2 rounded-full ml-2 transition-colors ${
-                    user.chat_locked
-                      ? 'bg-primary/10 text-primary'
-                      : 'hover:bg-muted'
-                  }`}
-                >
-                  {user.chat_locked ? (
-                    <Lock className="h-5 w-5" />
-                  ) : (
-                    <Unlock className="h-5 w-5" />
-                  )}
-                </button>
-              </div>
-            ))}
-          </div>
-        </div>
-      ) : (
-        <div className="flex flex-col h-full bg-muted/50">
-          <div className="flex items-center p-4 border-b border-border bg-card">
-            <button
-              onClick={() => setSelectedUser(null)}
-              className="p-1 hover:bg-muted rounded-full mr-2 transition-colors"
-            >
-              <ArrowLeft className="h-6 w-6 text-muted-foreground" />
-            </button>
-            <img
-              src={selectedUserData?.avatar_url || `https://api.dicebear.com/7.x/initials/svg?seed=${selectedUserData?.id}`}
-              alt=""
-              className="w-10 h-10 rounded-full object-cover"
-            />
-            <div className="ml-3 flex-1">
-              <h3 className="font-medium text-foreground">
-                {selectedUserData?.custom_chat_name || selectedUserData?.username}
-              </h3>
-              <p className="text-sm text-muted-foreground">Active now</p>
-            </div>
-            <div className="flex items-center space-x-2">
-              <button className="p-2 hover:bg-muted rounded-full transition-colors">
-                <Phone className="h-5 w-5 text-muted-foreground" />
-              </button>
-              <button className="p-2 hover:bg-muted rounded-full transition-colors">
-                <Video className="h-5 w-5 text-muted-foreground" />
-              </button>
-              <button className="p-2 hover:bg-muted rounded-full transition-colors">
-                <Info className="h-5 w-5 text-muted-foreground" />
-              </button>
-              <button
-                onClick={() => toggleChatLock(selectedUserData?.id || '')}
-                className={`p-2 rounded-full transition-colors ${
-                  selectedUserData?.chat_locked
-                    ? 'bg-primary/10 text-primary'
-                    : 'hover:bg-muted'
-                }`}
-              >
-                {selectedUserData?.chat_locked ? (
-                  <Lock className="h-5 w-5" />
-                ) : (
-                  <Unlock className="h-5 w-5" />
-                )}
-              </button>
-            </div>
-          </div>
-
-          <div className="flex-1 overflow-y-auto p-4 space-y-4">
-            {messages.map((message) => (
-              <div
-                key={message.id}
-                className={`flex ${
-                  message.user_id === session.user.id ? 'justify-end' : 'justify-start'
-                }`}
-              >
-                <div
-                  className={`max-w-[70%] rounded-2xl px-4 py-2 ${
-                    message.user_id === session.user.id
-                      ? 'bg-primary text-primary-foreground'
-                      : 'bg-card text-foreground'
-                  }`}
-                >
-                  <p className="text-sm">{message.content}</p>
-                  <p className="text-xs mt-1 opacity-75">
-                    {new Date(message.created_at).toLocaleTimeString([], {
-                      hour: '2-digit',
-                      minute: '2-digit'
-                    })}
-                  </p>
+                </div>
+                <div className="flex items-center gap-2">
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={() => setShowLockedChats(!showLockedChats)}
+                    className={`p-2 sm:p-2.5 rounded-xl transition-all ${
+                      showLockedChats 
+                        ? 'bg-primary text-primary-foreground' 
+                        : 'bg-muted hover:bg-muted/80 text-muted-foreground'
+                    }`}
+                  >
+                    {showLockedChats ? <Lock className="h-4 w-4 sm:h-5 sm:w-5" /> : <Unlock className="h-4 w-4 sm:h-5 sm:w-5" />}
+                  </motion.button>
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    className="p-2 sm:p-2.5 hover:bg-muted rounded-xl transition-colors"
+                  >
+                    <Settings className="h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground" />
+                  </motion.button>
                 </div>
               </div>
-            ))}
-            <div ref={messagesEndRef} />
-          </div>
-
-          <form
-            onSubmit={handleSendMessage}
-            className="p-4 bg-card border-t border-border"
-          >
-            <div className="flex items-center space-x-2">
-              <input
-                type="text"
-                value={newMessage}
-                onChange={(e) => setNewMessage(e.target.value)}
-                placeholder="Message..."
-                className="flex-1 px-4 py-2 bg-muted border border-border rounded-full focus:outline-none focus:ring-2 focus:ring-ring text-foreground placeholder:text-muted-foreground"
-              />
-              <button
-                type="submit"
-                disabled={!newMessage.trim()}
-                className="p-2 text-primary hover:text-primary/80 rounded-full hover:bg-primary/10 focus:outline-none focus:ring-2 focus:ring-ring disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-              >
-                <Send className="w-5 h-5" />
-              </button>
+              
+              {/* Search */}
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground h-4 w-4" />
+                <input
+                  type="text"
+                  placeholder="Search conversations..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full pl-10 pr-4 py-2.5 sm:py-3 bg-muted/50 border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/50 text-foreground placeholder:text-muted-foreground text-sm"
+                />
+              </div>
             </div>
-          </form>
-        </div>
-      )}
-    </div>
+
+            {/* User list */}
+            <div className="flex-1 overflow-y-auto">
+              {filteredUsers.length === 0 ? (
+                <div className="flex flex-col items-center justify-center h-full p-8 text-center">
+                  <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mb-4">
+                    <Users className="h-8 w-8 text-muted-foreground/50" />
+                  </div>
+                  <p className="text-muted-foreground text-sm">No conversations yet</p>
+                  <p className="text-muted-foreground/70 text-xs mt-1">Add friends to start chatting</p>
+                </div>
+              ) : (
+                filteredUsers.map((user, index) => (
+                  <motion.div
+                    key={user.id}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: index * 0.05 }}
+                    className="group"
+                  >
+                    <div className="flex items-center gap-3 p-3 sm:p-4 hover:bg-muted/50 transition-colors border-b border-border/50">
+                      <button
+                        onClick={() => setSelectedUser(user.id)}
+                        className="flex items-center gap-3 flex-1 min-w-0"
+                      >
+                        <div className="relative flex-shrink-0">
+                          <img
+                            src={user.avatar_url || `https://api.dicebear.com/7.x/initials/svg?seed=${user.id}`}
+                            alt=""
+                            className="w-12 h-12 sm:w-14 sm:h-14 rounded-full object-cover ring-2 ring-border"
+                          />
+                          <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full ring-2 ring-card" />
+                        </div>
+                        <div className="flex-1 min-w-0 text-left">
+                          <h3 className="font-semibold text-foreground truncate text-sm sm:text-base">
+                            {user.custom_chat_name || user.username}
+                          </h3>
+                          <p className="text-xs sm:text-sm text-muted-foreground truncate">
+                            Tap to start chatting
+                          </p>
+                        </div>
+                      </button>
+                      <motion.button
+                        whileHover={{ scale: 1.1 }}
+                        whileTap={{ scale: 0.9 }}
+                        onClick={() => toggleChatLock(user.id)}
+                        className={`p-2 rounded-lg transition-all opacity-0 group-hover:opacity-100 ${
+                          user.chat_locked
+                            ? 'bg-primary/10 text-primary'
+                            : 'hover:bg-muted text-muted-foreground'
+                        }`}
+                      >
+                        {user.chat_locked ? <Lock className="h-4 w-4" /> : <Unlock className="h-4 w-4" />}
+                      </motion.button>
+                    </div>
+                  </motion.div>
+                ))
+              )}
+            </div>
+          </motion.div>
+        ) : (
+          <motion.div
+            key="chat-view"
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0 }}
+            className="flex flex-col h-full"
+          >
+            {/* Chat header */}
+            <div className="flex items-center gap-3 p-3 sm:p-4 border-b border-border bg-card/50 backdrop-blur-sm">
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => setSelectedUser(null)}
+                className="p-2 hover:bg-muted rounded-xl transition-colors"
+              >
+                <ArrowLeft className="h-5 w-5 text-muted-foreground" />
+              </motion.button>
+              <img
+                src={selectedUserData?.avatar_url || `https://api.dicebear.com/7.x/initials/svg?seed=${selectedUserData?.id}`}
+                alt=""
+                className="w-10 h-10 sm:w-11 sm:h-11 rounded-full object-cover ring-2 ring-border"
+              />
+              <div className="flex-1 min-w-0">
+                <h3 className="font-semibold text-foreground truncate text-sm sm:text-base">
+                  {selectedUserData?.custom_chat_name || selectedUserData?.username}
+                </h3>
+                <p className="text-xs text-green-500 flex items-center gap-1">
+                  <span className="w-1.5 h-1.5 bg-green-500 rounded-full" />
+                  Active now
+                </p>
+              </div>
+              <div className="flex items-center gap-1">
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  className="p-2 hover:bg-muted rounded-xl transition-colors hidden sm:flex"
+                >
+                  <Phone className="h-5 w-5 text-muted-foreground" />
+                </motion.button>
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  className="p-2 hover:bg-muted rounded-xl transition-colors hidden sm:flex"
+                >
+                  <Video className="h-5 w-5 text-muted-foreground" />
+                </motion.button>
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  className="p-2 hover:bg-muted rounded-xl transition-colors"
+                >
+                  <Info className="h-5 w-5 text-muted-foreground" />
+                </motion.button>
+              </div>
+            </div>
+
+            {/* Messages */}
+            <div className="flex-1 overflow-y-auto p-3 sm:p-4 space-y-3 bg-muted/20">
+              {messages.length === 0 ? (
+                <div className="flex flex-col items-center justify-center h-full text-center">
+                  <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mb-4">
+                    <MessageCircle className="h-8 w-8 text-muted-foreground/50" />
+                  </div>
+                  <p className="text-muted-foreground text-sm">No messages yet</p>
+                  <p className="text-muted-foreground/70 text-xs mt-1">Say hi to start the conversation!</p>
+                </div>
+              ) : (
+                messages.map((message, index) => (
+                  <motion.div
+                    key={message.id}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: index * 0.02 }}
+                    className={`flex ${message.user_id === session.user.id ? 'justify-end' : 'justify-start'}`}
+                  >
+                    <div
+                      className={`max-w-[80%] sm:max-w-[70%] rounded-2xl px-4 py-2.5 ${
+                        message.user_id === session.user.id
+                          ? 'bg-primary text-primary-foreground rounded-br-md'
+                          : 'bg-card text-foreground border border-border rounded-bl-md'
+                      }`}
+                    >
+                      <p className="text-sm break-words">{message.content}</p>
+                      <p className={`text-[10px] mt-1 ${
+                        message.user_id === session.user.id ? 'text-primary-foreground/70' : 'text-muted-foreground'
+                      }`}>
+                        {new Date(message.created_at).toLocaleTimeString([], {
+                          hour: '2-digit',
+                          minute: '2-digit'
+                        })}
+                      </p>
+                    </div>
+                  </motion.div>
+                ))
+              )}
+              <div ref={messagesEndRef} />
+            </div>
+
+            {/* Message input */}
+            <form onSubmit={handleSendMessage} className="p-3 sm:p-4 bg-card border-t border-border">
+              <div className="flex items-center gap-2 sm:gap-3">
+                <input
+                  type="text"
+                  value={newMessage}
+                  onChange={(e) => setNewMessage(e.target.value)}
+                  placeholder="Type a message..."
+                  className="flex-1 px-4 py-2.5 sm:py-3 bg-muted/50 border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/50 text-foreground placeholder:text-muted-foreground text-sm"
+                />
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  type="submit"
+                  disabled={!newMessage.trim()}
+                  className="p-2.5 sm:p-3 bg-primary text-primary-foreground rounded-xl hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg shadow-primary/25"
+                >
+                  <Send className="w-5 h-5" />
+                </motion.button>
+              </div>
+            </form>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </motion.div>
   );
 }
