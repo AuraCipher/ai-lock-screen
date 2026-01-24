@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Home, MessageCircle, Compass, User, Settings, Bell, Globe, X, Check, Search } from 'lucide-react';
+import { Home, MessageCircle, Compass, User, Bell, Globe, X, Check, Search } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import { Session } from '@supabase/supabase-js';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -8,7 +8,6 @@ import Feed from './Feed';
 import Profile from './Profile';
 import Chat from './Chat';
 import Explore from './Explore';
-import UserSettings from './UserSettings';
 import FriendSearch from './FriendSearch';
 
 interface Profile {
@@ -222,9 +221,7 @@ export default function Dashboard({ session }: DashboardProps) {
       case 'chat':
         return <Chat session={session} />;
       case 'profile':
-        return <Profile session={session} profile={profile} />;
-      case 'settings':
-        return <UserSettings session={session} profile={profile} onSignOut={handleSignOut} />;
+        return <Profile session={session} profile={profile} onSignOut={handleSignOut} />;
       default:
         return <Feed session={session} />;
     }
@@ -235,7 +232,6 @@ export default function Dashboard({ session }: DashboardProps) {
     { icon: Compass, tab: 'explore', label: 'Explore' },
     { icon: MessageCircle, tab: 'chat', label: 'Chat' },
     { icon: User, tab: 'profile', label: 'Profile' },
-    { icon: Settings, tab: 'settings', label: 'Settings' }
   ];
 
   return (
@@ -392,7 +388,7 @@ export default function Dashboard({ session }: DashboardProps) {
         </div>
       </main>
 
-      {/* Bottom navigation */}
+      {/* Bottom navigation - removed settings tab */}
       <nav className="flex-shrink-0 bg-card/80 backdrop-blur-xl border-t border-border z-50">
         <div className="flex justify-around items-center h-16 sm:h-20 px-2 sm:px-4 max-w-lg mx-auto">
           {navItems.map(({ icon: Icon, tab, label }) => (
