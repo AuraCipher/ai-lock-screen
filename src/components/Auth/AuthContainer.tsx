@@ -556,7 +556,7 @@ export default function AuthContainer() {
           className="w-full max-w-4xl h-full max-h-[600px] bg-card rounded-2xl sm:rounded-3xl shadow-2xl overflow-hidden relative flex"
         >
           {/* Mobile: Simple full-page form */}
-          <div className="flex-1 lg:hidden flex flex-col h-full">
+          <div className="flex-1 md:hidden flex flex-col h-full">
             <div className="flex-1 flex flex-col justify-center px-6 py-8">
               <AnimatePresence mode="wait">
                 {mode === 'signin' ? (
@@ -695,7 +695,7 @@ export default function AuthContainer() {
           {/* Desktop: Split panel view */}
           {/* Sign In Form Panel */}
           <motion.div
-            className="hidden lg:flex w-1/2 p-8 lg:p-12 flex-col justify-center absolute inset-y-0 left-0 bg-card"
+            className="hidden md:flex w-1/2 p-6 md:p-8 lg:p-12 flex-col justify-center absolute inset-y-0 left-0 bg-card"
             style={{ zIndex: isRightPanelActive ? 5 : 15 }}
             animate={{
               opacity: isRightPanelActive ? 0 : 1,
@@ -768,7 +768,7 @@ export default function AuthContainer() {
           
           {/* Sign Up Form Panel */}
           <motion.div
-            className="hidden lg:flex w-1/2 p-8 lg:p-12 flex-col justify-center absolute inset-y-0 right-0 bg-card"
+            className="hidden md:flex w-1/2 p-6 md:p-8 lg:p-12 flex-col justify-center absolute inset-y-0 right-0 bg-card"
             style={{ zIndex: isRightPanelActive ? 15 : 5 }}
             animate={{
               opacity: isRightPanelActive ? 1 : 0,
@@ -824,9 +824,9 @@ export default function AuthContainer() {
             </div>
           </motion.div>
           
-          {/* Overlay Panel - Desktop only */}
+          {/* Overlay Panel - Tablet and Desktop */}
           <motion.div
-            className="hidden lg:flex w-1/2 absolute inset-y-0 bg-gradient-to-br from-primary via-purple-600 to-pink-500 z-20 items-center justify-center"
+            className="hidden md:flex w-1/2 absolute inset-y-0 bg-gradient-to-br from-primary via-purple-600 to-pink-500 z-20 items-center justify-center"
             initial={{ left: '50%' }}
             animate={{
               left: isRightPanelActive ? '0%' : '50%',
