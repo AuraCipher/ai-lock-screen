@@ -555,72 +555,57 @@ export default function AuthContainer() {
           transition={{ duration: 0.5 }}
           className="w-full max-w-4xl h-full max-h-[600px] bg-card rounded-2xl sm:rounded-3xl shadow-2xl overflow-hidden relative flex"
         >
-          {/* Mobile: Single panel view */}
-          <div className="flex-1 lg:hidden flex flex-col h-full overflow-y-auto">
-            {/* Mobile header with gradient */}
-            <div className="bg-gradient-to-br from-primary via-purple-600 to-pink-500 px-6 py-6 sm:py-8 text-center text-white flex-shrink-0">
-              <motion.div
-                initial={{ opacity: 0, y: -10 }}
-                animate={{ opacity: 1, y: 0 }}
-              >
-                <div className="w-12 h-12 sm:w-14 sm:h-14 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center mx-auto mb-3">
-                  {mode === 'signin' ? (
-                    <Zap className="h-6 w-6 sm:h-7 sm:w-7 text-white" />
-                  ) : (
-                    <Sparkles className="h-6 w-6 sm:h-7 sm:w-7 text-white" />
-                  )}
-                </div>
-                <h1 className="text-xl sm:text-2xl font-bold">
-                  {mode === 'signin' ? 'Welcome Back!' : 'Join AureX'}
-                </h1>
-                <p className="text-white/80 text-xs sm:text-sm mt-1">
-                  {mode === 'signin' ? 'Sign in to continue' : 'Create your account'}
-                </p>
-              </motion.div>
-            </div>
-            
-            {/* Mobile form content */}
-            <div className="flex-1 p-4 sm:p-6 overflow-y-auto">
+          {/* Mobile: Simple full-page form */}
+          <div className="flex-1 lg:hidden flex flex-col h-full">
+            <div className="flex-1 flex flex-col justify-center px-6 py-8">
               <AnimatePresence mode="wait">
                 {mode === 'signin' ? (
                   <motion.div
                     key="signin-mobile"
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    exit={{ opacity: 0, x: 20 }}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    className="w-full max-w-sm mx-auto"
                   >
-                    <form onSubmit={handleSignIn} className="space-y-3 sm:space-y-4">
+                    <div className="text-center mb-8">
+                      <div className="w-14 h-14 bg-primary/10 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                        <Zap className="h-7 w-7 text-primary" />
+                      </div>
+                      <h1 className="text-2xl font-bold text-foreground">Sign In</h1>
+                    </div>
+                    
+                    <form onSubmit={handleSignIn} className="space-y-4">
                       <div className="relative">
-                        <Mail className="absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground" />
+                        <Mail className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
                         <input
                           type="email"
                           value={signInEmail}
                           onChange={(e) => setSignInEmail(e.target.value)}
                           placeholder="Email address"
-                          className="w-full pl-10 sm:pl-12 pr-4 py-3 sm:py-4 bg-background border border-input rounded-xl text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary transition-all text-sm sm:text-base"
+                          className="w-full pl-12 pr-4 py-4 bg-background border border-input rounded-xl text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary transition-all"
                         />
                       </div>
                       
                       <div className="relative">
-                        <Lock className="absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground" />
+                        <Lock className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
                         <input
                           type={showPassword ? 'text' : 'password'}
                           value={signInPassword}
                           onChange={(e) => setSignInPassword(e.target.value)}
                           placeholder="Password"
-                          className="w-full pl-10 sm:pl-12 pr-10 sm:pr-12 py-3 sm:py-4 bg-background border border-input rounded-xl text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary transition-all text-sm sm:text-base"
+                          className="w-full pl-12 pr-12 py-4 bg-background border border-input rounded-xl text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary transition-all"
                         />
                         <button
                           type="button"
                           onClick={() => setShowPassword(!showPassword)}
-                          className="absolute right-3 sm:right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                          className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
                         >
-                          {showPassword ? <EyeOff className="h-4 w-4 sm:h-5 sm:w-5" /> : <Eye className="h-4 w-4 sm:h-5 sm:w-5" />}
+                          {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
                         </button>
                       </div>
                       
                       <div className="text-right">
-                        <button type="button" onClick={handleForgotPassword} className="text-xs sm:text-sm text-primary hover:underline">
+                        <button type="button" onClick={handleForgotPassword} className="text-sm text-primary hover:underline">
                           Forgot password?
                         </button>
                       </div>
@@ -628,32 +613,40 @@ export default function AuthContainer() {
                       <button
                         type="submit"
                         disabled={isLoading}
-                        className="w-full py-3 sm:py-4 bg-primary text-primary-foreground rounded-xl font-semibold hover:bg-primary/90 transition-all disabled:opacity-50 flex items-center justify-center gap-2 shadow-lg shadow-primary/25 text-sm sm:text-base"
+                        className="w-full py-4 bg-primary text-primary-foreground rounded-xl font-semibold hover:bg-primary/90 transition-all disabled:opacity-50 flex items-center justify-center gap-2 shadow-lg shadow-primary/25"
                       >
-                        {isLoading ? <Loader2 className="h-4 w-4 sm:h-5 sm:w-5 animate-spin" /> : <><span>Sign In</span><ArrowRight className="h-4 w-4 sm:h-5 sm:w-5" /></>}
+                        {isLoading ? <Loader2 className="h-5 w-5 animate-spin" /> : <><span>Sign In</span><ArrowRight className="h-5 w-5" /></>}
                       </button>
                     </form>
                     
-                    <div className="mt-4 sm:mt-6">
+                    <div className="mt-6">
                       <SocialLoginButtons mode="signin" />
+                    </div>
+                    
+                    <div className="mt-8 text-center">
+                      <p className="text-muted-foreground text-sm">Don't have an account?</p>
+                      <button onClick={handleModeToggle} className="text-primary font-semibold hover:underline mt-1">
+                        Create Account
+                      </button>
                     </div>
                   </motion.div>
                 ) : (
                   <motion.div
                     key="signup-mobile"
-                    initial={{ opacity: 0, x: 20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    exit={{ opacity: 0, x: -20 }}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    className="w-full max-w-sm mx-auto"
                   >
                     {/* Progress indicator */}
-                    <div className="flex items-center justify-center gap-1.5 sm:gap-2 mb-4 sm:mb-6">
+                    <div className="flex items-center justify-center gap-2 mb-6">
                       {steps.map((step, index) => (
                         <motion.div
                           key={step}
-                          className={`h-1.5 sm:h-2 rounded-full transition-all duration-300 ${
+                          className={`h-2 rounded-full transition-all duration-300 ${
                             index <= currentStepIndex ? 'bg-primary' : 'bg-muted'
                           }`}
-                          animate={{ width: index <= currentStepIndex ? 20 : 8 }}
+                          animate={{ width: index <= currentStepIndex ? 24 : 10 }}
                         />
                       ))}
                     </div>
@@ -662,43 +655,40 @@ export default function AuthContainer() {
                       {renderSignUpStep()}
                     </AnimatePresence>
                     
-                    <div className="flex gap-2 sm:gap-3 mt-4 sm:mt-6">
+                    <div className="flex gap-3 mt-6">
                       {currentStepIndex > 0 && (
                         <button
                           onClick={handlePrevStep}
-                          className="flex-1 py-3 sm:py-4 bg-muted text-foreground rounded-xl font-semibold hover:bg-muted/80 transition-all flex items-center justify-center gap-1 sm:gap-2 text-sm sm:text-base"
+                          className="flex-1 py-4 bg-muted text-foreground rounded-xl font-semibold hover:bg-muted/80 transition-all flex items-center justify-center gap-2"
                         >
-                          <ArrowLeft className="h-4 w-4 sm:h-5 sm:w-5" />
+                          <ArrowLeft className="h-5 w-5" />
                           <span>Back</span>
                         </button>
                       )}
                       <button
                         onClick={handleNextStep}
                         disabled={isLoading}
-                        className={`${currentStepIndex > 0 ? 'flex-1' : 'w-full'} py-3 sm:py-4 bg-primary text-primary-foreground rounded-xl font-semibold hover:bg-primary/90 transition-all disabled:opacity-50 flex items-center justify-center gap-1 sm:gap-2 shadow-lg shadow-primary/25 text-sm sm:text-base`}
+                        className={`${currentStepIndex > 0 ? 'flex-1' : 'w-full'} py-4 bg-primary text-primary-foreground rounded-xl font-semibold hover:bg-primary/90 transition-all disabled:opacity-50 flex items-center justify-center gap-2 shadow-lg shadow-primary/25`}
                       >
                         {isLoading ? (
-                          <Loader2 className="h-4 w-4 sm:h-5 sm:w-5 animate-spin" />
+                          <Loader2 className="h-5 w-5 animate-spin" />
                         ) : currentStep === 'confirmation' ? (
-                          <><span>Create Account</span><Check className="h-4 w-4 sm:h-5 sm:w-5" /></>
+                          <><span>Create Account</span><Check className="h-5 w-5" /></>
                         ) : (
-                          <><span>Continue</span><ArrowRight className="h-4 w-4 sm:h-5 sm:w-5" /></>
+                          <><span>Continue</span><ArrowRight className="h-5 w-5" /></>
                         )}
+                      </button>
+                    </div>
+                    
+                    <div className="mt-8 text-center">
+                      <p className="text-muted-foreground text-sm">Already have an account?</p>
+                      <button onClick={handleModeToggle} className="text-primary font-semibold hover:underline mt-1">
+                        Sign In
                       </button>
                     </div>
                   </motion.div>
                 )}
               </AnimatePresence>
-              
-              {/* Mobile toggle */}
-              <div className="mt-4 sm:mt-6 text-center pb-4">
-                <p className="text-muted-foreground text-xs sm:text-sm">
-                  {mode === 'signin' ? "Don't have an account?" : 'Already have an account?'}
-                </p>
-                <button onClick={handleModeToggle} className="text-primary font-semibold hover:underline mt-1 text-sm sm:text-base">
-                  {mode === 'signin' ? 'Create Account' : 'Sign In'}
-                </button>
-              </div>
             </div>
           </div>
           
